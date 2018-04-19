@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>373</width>
-    <height>383</height>
+    <height>477</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,9 +28,9 @@
    <widget class="QPushButton" name="b_pokreni">
     <property name="geometry">
      <rect>
-      <x>200</x>
-      <y>350</y>
-      <width>75</width>
+      <x>210</x>
+      <y>440</y>
+      <width>71</width>
       <height>23</height>
      </rect>
     </property>
@@ -42,8 +42,8 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>350</y>
-      <width>75</width>
+      <y>440</y>
+      <width>71</width>
       <height>23</height>
      </rect>
     </property>
@@ -354,7 +354,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>350</y>
+      <y>440</y>
       <width>70</width>
       <height>17</height>
      </rect>
@@ -465,6 +465,129 @@
     </property>
     <property name="text">
      <string>[ms]</string>
+    </property>
+   </widget>
+   <widget class="Line" name="line_4">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>330</y>
+      <width>351</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_18">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>350</y>
+      <width>161</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Direktorij za spremanje logova:</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="i_gazePoint_2">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>440</y>
+      <width>70</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Logiranje</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="b_log_folder">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>370</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="i_log_folder">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>375</y>
+      <width>311</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>C:/</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_20">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>410</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Šifra ispitanika:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="i_participant">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>410</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="w_warning">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>410</y>
+      <width>21</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_21">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>410</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>UNESI ŠIFRU</string>
     </property>
    </widget>
   </widget>

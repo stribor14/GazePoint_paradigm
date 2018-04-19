@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QDesktopWidget>
 #include <QDebug>
+#include <QFileDialog>
+#include <QMessageBox>
 
 #include <cmath>
 #include <random>
@@ -39,7 +41,7 @@ private:
     QGraphicsView *dispView;
     QGraphicsScene *dispScene;
 
-    GazeComunicator GazePt;
+    GazeComunicator* GazePt;
 
     QTimer runTimer;
     QTimer cyclicTimer;

@@ -28,13 +28,15 @@ SOURCES += \
         mainwindow.cpp \
         GPClient.cpp \
     gazecomunicator.cpp \
-    qdot.cpp
+    qdot.cpp \
+    gplogger.cpp
 
 HEADERS += \
         mainwindow.h \
         GPClient.h \
     gazecomunicator.h \
-    qdot.h
+    qdot.h \
+    gplogger.h
 
 FORMS += \
         mainwindow.ui

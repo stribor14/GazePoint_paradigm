@@ -3,6 +3,7 @@
 GazeComunicator::GazeComunicator(QObject * parent) : QObject(parent)
 {
     GP = new GPClient();
+    logger = new GPLogger();
     moveToThread(&thread);
     connect(&thread, SIGNAL(started()), this, SLOT(MsgLoop()));
 }
@@ -17,7 +18,12 @@ void GazeComunicator::Start()
     GP->client_connect();
     while(!GP->is_connected());
     GP->send_cmd("<SET ID=\"ENABLE_SEND_TIME\" STATE=\"1\" />");
+    GP->send_cmd("<SET ID=\"ENABLE_SEND_COUNTER\" STATE=\"1\" />");
     GP->send_cmd("<SET ID=\"ENABLE_SEND_POG_FIX\" STATE=\"1\" />");
+    GP->send_cmd("<SET ID=\"ENABLE_SEND_POG_BEST\" STATE=\"1\" />");
+
+    // zjenica?
+
     GP->send_cmd("<SET ID=\"ENABLE_SEND_DATA\" STATE=\"1\" />");
 
     stopThread = false;
@@ -33,6 +39,16 @@ void GazeComunicator::Stop()
     thread.wait();      // if you want synchronous stop
 }
 
+void GazeComunicator::startLog(QString folder, QString name)
+{
+    logger->startLog(folder, name);
+}
+
+void GazeComunicator::stopLog()
+{
+
+}
+
 void GazeComunicator::MsgLoop()
 {
     deque<string> buffer;
@@ -40,7 +56,7 @@ void GazeComunicator::MsgLoop()
         GP->get_rx(buffer);
         if(buffer.size() > 0)
         {
-          qDebug() << buffer.size();
+
         }
     }
     QThread::currentThread()->quit();

@@ -20,9 +20,13 @@ void resetRandom(){
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    secondDisplay(new QWidget)
+    secondDisplay(new QWidget),
+    GazePt(new GazeComunicator)
 {
     ui->setupUi(this);
+
+    ui->b_log_folder->setIcon(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon));
+    ui->w_warning->setPixmap(QApplication::style()->standardPixmap(QStyle::SP_MessageBoxWarning));
 
     dispView = new QGraphicsView(secondDisplay);
     dispScene = new QGraphicsScene(dispView);
@@ -71,6 +75,16 @@ MainWindow::MainWindow(QWidget *parent) :
     });
 
     connect(ui->b_pokreni, &QPushButton::clicked,[&](){
+
+        if(!ui->i_participant->text().compare("")){
+            QMessageBox::warning(this, "Greška",
+                                 "Nije unesena šifra korisnika!");
+            return;
+        }
+
+
+        GazePt->startLog(ui->i_log_folder->text(), ui->i_participant->text());
+
         QRect &&screenres = ui->i_screenBox->currentData().toRect();
 
         secondDisplay->move(QPoint(screenres.x(), screenres.y()));
@@ -95,6 +109,8 @@ MainWindow::MainWindow(QWidget *parent) :
         runStaticSegment();
 
         secondDisplay->close();
+
+        GazePt->stopLog();
     });
 
     connect(ui->b_izlaz, &QPushButton::clicked, [&](){
@@ -106,12 +122,21 @@ MainWindow::MainWindow(QWidget *parent) :
        ui->i_timeStaticDot->setDisabled(ui->i_gazePoint->isChecked());
     });
 
-    GazePt.Start();
+    connect(ui->b_log_folder, &QPushButton::clicked, [&](){
+        ui->i_log_folder->setText(
+                    QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                        ui->i_log_folder->text(),
+                                                        QFileDialog::ShowDirsOnly
+                                                        | QFileDialog::DontResolveSymlinks));
+    });
+
+    GazePt->Start();
 }
 
 MainWindow::~MainWindow()
 {
-    GazePt.Stop();
+    GazePt->Stop();
+    delete GazePt;
     delete ui;
 }
 

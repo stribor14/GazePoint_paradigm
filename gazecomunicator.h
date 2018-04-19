@@ -2,6 +2,7 @@
 #define GAZECOMUNICATOR_H
 
 #include "GPClient.h"
+#include "gplogger.h"
 
 #include <QObject>
 #include <QDebug>
@@ -16,6 +17,8 @@ public:
     ~GazeComunicator();
     void Start();
     void Stop();
+    void startLog(QString folder, QString name);
+    void stopLog();
 
 private slots:
     void MsgLoop();
@@ -25,6 +28,7 @@ signals:
 
 private:
     GPClient* GP;
+    GPLogger* logger;
     QThread thread;
     bool stopThread;
 };
