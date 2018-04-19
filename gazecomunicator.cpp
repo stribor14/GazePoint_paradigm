@@ -1,9 +1,12 @@
 #include "gazecomunicator.h"
 
+QMutex GPmutex;
+
 GazeComunicator::GazeComunicator(QObject * parent) : QObject(parent)
 {
     GP = new GPClient();
     logger = new GPLogger();
+    parser = new GPDataParser();
     moveToThread(&thread);
     connect(&thread, SIGNAL(started()), this, SLOT(MsgLoop()));
 }
@@ -11,6 +14,8 @@ GazeComunicator::GazeComunicator(QObject * parent) : QObject(parent)
 GazeComunicator::~GazeComunicator()
 {
     delete GP;
+    delete parser;
+    delete logger;
 }
 
 void GazeComunicator::Start()
@@ -46,7 +51,24 @@ void GazeComunicator::startLog(QString folder, QString name)
 
 void GazeComunicator::stopLog()
 {
+    logger->stopLog();
+}
 
+void GazeComunicator::setPerimeter(double perimeterX, double perimeterY)
+{
+     targetPerimeterX = perimeterX;
+     targetPerimeterY = perimeterY;
+}
+
+void GazeComunicator::setTarget(int num, double &x, double &y, bool needUnlock)
+{
+    GPmutex.lock();
+    targetNum = num;
+    targetX = x;
+    targetY = y;
+    targetUnlock = needUnlock;
+    targetFound = false;
+    GPmutex.unlock();
 }
 
 void GazeComunicator::MsgLoop()
@@ -54,10 +76,17 @@ void GazeComunicator::MsgLoop()
     deque<string> buffer;
     while(!stopThread){
         GP->get_rx(buffer);
-        if(buffer.size() > 0)
-        {
-
+        for(auto &&data: buffer){
+            std::map<std::string, double> temp = std::move(parser->parseData(data));
+            logger->logGaze(temp);
+            if(!targetFound)
+                if(fabs(temp["BPOGX"] - targetX) < targetPerimeterX && fabs(temp["BPOGY"] - targetY) < targetPerimeterY){
+                    targetFound = true;
+                    logger->logEvent(targetNum, temp["CNT"], temp["TIME"]);
+                    if(targetUnlock) emit targetReached();
+                }
         }
+
     }
     QThread::currentThread()->quit();
 }

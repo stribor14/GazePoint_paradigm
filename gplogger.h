@@ -3,11 +3,11 @@
 
 #include <QString>
 #include <QDateTime>
+#include <QDebug>
 #include <QMap>
 #include <QVector>
 
 #include <fstream>
-#include <deque>
 #include <string>
 
 class GPLogger
@@ -16,8 +16,8 @@ public:
     GPLogger();
     void startLog(QString folder, QString name);
     void stopLog();
-    void logGaze(std::deque<std::map<std::string, int>> &data);
-    void logEvent(std::string &data);
+    void logGaze(std::map<std::string, double> &data);
+    void logEvent(int eventNumber, int gazeID, double gazeTime);
 
 private:
     std::ofstream logFile;
@@ -29,6 +29,7 @@ class GPDataParser
 {
 public:
     GPDataParser();
-    std::map<std::string, int> parseData(std::string &data);
+    std::map<std::string, double> parseData(std::string &data);
+
 };
 #endif // GPLOGGER_H

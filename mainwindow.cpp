@@ -83,8 +83,6 @@ MainWindow::MainWindow(QWidget *parent) :
         }
 
 
-        GazePt->startLog(ui->i_log_folder->text(), ui->i_participant->text());
-
         QRect &&screenres = ui->i_screenBox->currentData().toRect();
 
         secondDisplay->move(QPoint(screenres.x(), screenres.y()));
@@ -93,6 +91,9 @@ MainWindow::MainWindow(QWidget *parent) :
         dispWidth = screenres.width();
         dispHeight = screenres.height();
         dispScene->setSceneRect(0,0,dispWidth, dispHeight);
+
+        GazePt->startLog(ui->i_log_folder->text(), ui->i_participant->text());
+        GazePt->setPerimeter((100.0 / dispWidth), (100.0 / dispHeight));
 
         secondDisplay->showFullScreen();
 
@@ -142,18 +143,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::runStaticSegment()
 {
-    //TODO: komunikaciju s gazepointom
-    QEventLoop tempLoop;
-    if (!ui->i_gazePoint->isChecked())
-        connect(&cyclicTimer, &QTimer::timeout,[&](){
-            int newX = generator_uniform() * dispWidth;
-            int newY = generator_uniform() * dispHeight;
-            red_dot->setCord(newX, newY);
-        });
-    else ;
+    int targetNum = 1;
 
-    red_dot->setCord(dispWidth/2, dispHeight/2);
-    dispScene->addItem(red_dot);
+    QEventLoop tempLoop;
 
     runTimer.singleShot(1000 * readLine(i_timeStaticSegment), Qt::PreciseTimer,[&](){
         if(!ui->i_gazePoint->isChecked()){
@@ -161,14 +153,44 @@ void MainWindow::runStaticSegment()
             cyclicTimer.stop();
         }
         else {
-            qDebug() << "ovde";
+            GazePt->disconnect();
         };
         dispScene->removeItem(red_dot);
         tempLoop.quit();
     });
 
-    if (!ui->i_gazePoint->isChecked()) cyclicTimer.start(readLine(i_timeStaticDot));
-    else ;
+    if (!ui->i_gazePoint->isChecked()){
+        // NEW DOT AFTER FIXED TIME
+        connect(&cyclicTimer, &QTimer::timeout,[&](){
+            double newX = generator_uniform();
+            double newY = generator_uniform();
+            red_dot->setCord(newX * dispWidth, newY * dispHeight);
+            GazePt->setTarget(targetNum++, newX, newY);
+        });
+        double newX = 0.5;
+        double newY = 0.5;
+        red_dot->setCord(dispWidth/2, dispHeight/2);
+        GazePt->setTarget(targetNum++, newX, newY);
+        dispScene->addItem(red_dot);
+
+        cyclicTimer.start(readLine(i_timeStaticDot));
+    }
+    else{
+        // NEW DOT AFTER GAZE FIXATION
+        connect(GazePt, &GazeComunicator::targetReached, [&](){
+            double newX = generator_uniform();
+            double newY = generator_uniform();
+            red_dot->setCord(newX * dispWidth, newY * dispHeight);
+            GazePt->setTarget(targetNum++, newX, newY, true);
+            dispScene->update();
+        });
+        double newX = 0.5;
+        double newY = 0.5;
+        red_dot->setCord(dispWidth/2, dispHeight/2);
+        GazePt->setTarget(targetNum++, newX, newY, true);
+        dispScene->addItem(red_dot);
+        }
+
     tempLoop.exec();
 }
 
@@ -308,5 +330,3 @@ void MainWindow::octaCollisionCheck()
     }
 }
 
-
-// TODO: spremanje log-a radi sinkronizacije
