@@ -146,7 +146,14 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     GazePt->Stop();
+
     delete GazePt;
+    delete secondDisplay;
+
+    delete red_dot;
+    delete center_dot;
+    for(auto &&dot: octaDot) delete dot;
+
     delete ui;
 }
 
