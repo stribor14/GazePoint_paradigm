@@ -18,13 +18,13 @@ public:
     ~QDot(){}
 
     bool isTarget();
-    void setTarget(bool state);
+    void setTarget(const bool &state);
 
-    void setCord(int x, int y);
-    void setAngle(double angle);
+    void setCord(const int &x, const int &y);
+    void setAngle(const double &angle);
     double getAngle();
     double getDist();
-    void moveDot(double angle, double dist);
+    void moveDot(const double &angle, const double &dist);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent * event);

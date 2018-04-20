@@ -82,6 +82,7 @@ MainWindow::MainWindow(QWidget *parent) :
             return;
         }
 
+        bool temp_useGaze = ui->i_gazePoint->isChecked();
 
         QRect &&screenres = ui->i_screenBox->currentData().toRect();
 
@@ -93,21 +94,21 @@ MainWindow::MainWindow(QWidget *parent) :
         dispScene->setSceneRect(0,0,dispWidth, dispHeight);
 
         GazePt->startLog(ui->i_log_folder->text(), ui->i_participant->text());
-        GazePt->setPerimeter((100.0 / dispWidth), (100.0 / dispHeight));
+        GazePt->setPerimeter((100.0 / dispWidth), (100.0 / dispHeight), temp_useGaze);
 
         secondDisplay->showFullScreen();
 
         resetRandom();
-        runStaticSegment();
+        runStaticSegment(temp_useGaze);
         runDynamicSegment(1);
         resetRandom();
-        runStaticSegment();
+        runStaticSegment(temp_useGaze);
         runDynamicSegment(2);
         resetRandom();
-        runStaticSegment();
+        runStaticSegment(temp_useGaze);
         runDynamicSegment(3);
         resetRandom();
-        runStaticSegment();
+        runStaticSegment(temp_useGaze);
 
         secondDisplay->close();
 
@@ -141,25 +142,38 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::runStaticSegment()
+void MainWindow::runStaticSegment(const bool &useGaze)
 {
     int targetNum = 1;
 
     QEventLoop tempLoop;
 
     runTimer.singleShot(1000 * readLine(i_timeStaticSegment), Qt::PreciseTimer,[&](){
-        if(!ui->i_gazePoint->isChecked()){
-            cyclicTimer.disconnect();
-            cyclicTimer.stop();
+        if(useGaze){
+            GazePt->disconnect();
         }
         else {
-            GazePt->disconnect();
+            cyclicTimer.disconnect();
+            cyclicTimer.stop();
         };
         dispScene->removeItem(red_dot);
         tempLoop.quit();
     });
 
-    if (!ui->i_gazePoint->isChecked()){
+    if (useGaze){
+        // NEW DOT AFTER GAZE FIXATION
+        connect(GazePt, &GazeComunicator::targetReached, [&](){
+            double newX = generator_uniform();
+            double newY = generator_uniform();
+            red_dot->setCord(newX * dispWidth, newY * dispHeight);
+            GazePt->setTarget(targetNum++, newX, newY);
+            dispScene->update();
+        });
+        red_dot->setCord(dispWidth/2, dispHeight/2);
+        GazePt->setTarget(targetNum++, 0.5, 0.5);
+        dispScene->addItem(red_dot);
+    }
+    else{
         // NEW DOT AFTER FIXED TIME
         connect(&cyclicTimer, &QTimer::timeout,[&](){
             double newX = generator_uniform();
@@ -167,36 +181,21 @@ void MainWindow::runStaticSegment()
             red_dot->setCord(newX * dispWidth, newY * dispHeight);
             GazePt->setTarget(targetNum++, newX, newY);
         });
-        double newX = 0.5;
-        double newY = 0.5;
         red_dot->setCord(dispWidth/2, dispHeight/2);
-        GazePt->setTarget(targetNum++, newX, newY);
+        GazePt->setTarget(targetNum++, 0.5, 0.5);
         dispScene->addItem(red_dot);
 
         cyclicTimer.start(readLine(i_timeStaticDot));
-    }
-    else{
-        // NEW DOT AFTER GAZE FIXATION
-        connect(GazePt, &GazeComunicator::targetReached, [&](){
-            double newX = generator_uniform();
-            double newY = generator_uniform();
-            red_dot->setCord(newX * dispWidth, newY * dispHeight);
-            GazePt->setTarget(targetNum++, newX, newY, true);
-            dispScene->update();
-        });
-        double newX = 0.5;
-        double newY = 0.5;
-        red_dot->setCord(dispWidth/2, dispHeight/2);
-        GazePt->setTarget(targetNum++, newX, newY, true);
-        dispScene->addItem(red_dot);
         }
 
     tempLoop.exec();
 }
 
-void MainWindow::runDynamicSegment(int lvl)
+void MainWindow::runDynamicSegment(const int &lvl)
 {
     QEventLoop tempLoop;
+
+    GazePt->logCustomEvent(99990 + lvl);
 
     // part 1
     center_dot->setCord(dispWidth/2, dispHeight/2);
@@ -248,9 +247,10 @@ void MainWindow::runDynamicSegment(int lvl)
     for(auto &&dot: octaDot) dot->acceptMouse = true;
 
     tempLoop.exec();
+    GazePt->logCustomEvent(99990 + lvl + 5);
 }
 
-QList<int> MainWindow::octaColor(int lvl)
+QList<int> MainWindow::octaColor(const int &lvl)
 {
     QList<int> greenIndex;
     for(auto &&dot: octaDot) dot->setBrush(QBrush(Qt::white));

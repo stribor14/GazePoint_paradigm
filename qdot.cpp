@@ -9,19 +9,19 @@ QDot::QDot(int x, int y, int size, QBrush color, double angle) : QGraphicsEllips
 
 bool QDot::isTarget(){return target;}
 
-void QDot::setTarget(bool state){target = state;}
+void QDot::setTarget(const bool &state){target = state;}
 
-void QDot::setCord(int x, int y){
+void QDot::setCord(const int &x, const int &y){
     this->setRect(x,y,dotSize,dotSize);
 }
 
-void QDot::setAngle(double angle){dotAngle = angle;}
+void QDot::setAngle(const double &angle){dotAngle = angle;}
 
 double QDot::getAngle(){return dotAngle;}
 
 double QDot::getDist(){return oldDist;}
 
-void QDot::moveDot(double angle, double dist){
+void QDot::moveDot(const double &angle, const double &dist){
     dotAngle += angle;
     QRectF tempCurrent = this->rect();
     oldDist = dist;

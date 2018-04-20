@@ -14,10 +14,10 @@ class GPLogger
 {
 public:
     GPLogger();
-    void startLog(QString folder, QString name);
+    void startLog(const QString &folder, const QString &name);
     void stopLog();
-    void logGaze(std::map<std::string, double> &data);
-    void logEvent(int eventNumber, int gazeID, double gazeTime);
+    void logGaze(const std::map<std::string, double> &data);
+    void logEvent(const int &eventNumber,const int &gazeID, const double &gazeTime);
 
 private:
     std::ofstream logFile;
@@ -29,7 +29,7 @@ class GPDataParser
 {
 public:
     GPDataParser();
-    std::map<std::string, double> parseData(std::string &data);
+    std::map<std::string, double> parseData(const std::string &data);
 
 };
 #endif // GPLOGGER_H

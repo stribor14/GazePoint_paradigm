@@ -7,7 +7,7 @@ GPLogger::GPLogger()
 
 }
 
-void GPLogger::startLog(QString folder, QString name)
+void GPLogger::startLog(const QString &folder, const QString &name)
 {
     QString temp = folder + "" + QDateTime::currentDateTime().toString("yy_MM_dd-hh_mm") + "__" + name;
     logFile.open((temp + "_LOG.csv").toStdString(), std::ofstream::out | std::ofstream::app);
@@ -25,14 +25,14 @@ void GPLogger::stopLog()
     eventFile.close();
 }
 
-void GPLogger::logGaze(std::map<std::string, double> &data)
+void GPLogger::logGaze(const std::map<std::string, double> &data)
 {
     for(auto &&key: keys)
-        logFile << data[key] << ";" ;
+        logFile << data.at(key) << ";" ;
     logFile << "\n";
 }
 
-void GPLogger::logEvent(int eventNumber, int gazeID, double gazeTime)
+void GPLogger::logEvent(const int &eventNumber, const int &gazeID, const double &gazeTime)
 {
     eventFile << eventNumber << ";" << gazeID << ";" << gazeTime << "\n" ;
     qDebug() << eventNumber << ";" << gazeID << ";" << gazeTime;
@@ -58,7 +58,7 @@ GPDataParser::GPDataParser()
     keys.append("BPOGV");
 }
 
-std::map<std::string, double> GPDataParser::parseData(std::string &data)
+std::map<std::string, double> GPDataParser::parseData(const std::string &data)
 {
     std::map<std::string, double> temp;
     if(data.substr(1,3).compare("REC")){

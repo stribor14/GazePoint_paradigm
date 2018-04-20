@@ -30,7 +30,6 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -55,10 +54,10 @@ private:
     QDot* center_dot;
     QList<QDot*> octaDot;
 
-    void runStaticSegment();
-    void runDynamicSegment(int lvl);
+    void runStaticSegment(const bool &useGaze=false);
+    void runDynamicSegment(const int &lvl);
 
-    QList<int> octaColor(int lvl);
+    QList<int> octaColor(const int &lvl);
     void octaReset();
     void octaCollisionCheck();
 };

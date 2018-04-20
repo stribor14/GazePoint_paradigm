@@ -44,7 +44,7 @@ void GazeComunicator::Stop()
     thread.wait();      // if you want synchronous stop
 }
 
-void GazeComunicator::startLog(QString folder, QString name)
+void GazeComunicator::startLog(const QString &folder, const QString &name)
 {
     logger->startLog(folder, name);
 }
@@ -54,20 +54,28 @@ void GazeComunicator::stopLog()
     logger->stopLog();
 }
 
-void GazeComunicator::setPerimeter(double perimeterX, double perimeterY)
+void GazeComunicator::logCustomEvent(const int &eventNum)
+{
+    GPmutex.lock();
+    customEventNum = eventNum;
+    customEventPending = true;
+    GPmutex.unlock();
+}
+
+void GazeComunicator::setPerimeter(const double &perimeterX, const double &perimeterY, const bool &needUnlock)
 {
      targetPerimeterX = perimeterX;
      targetPerimeterY = perimeterY;
+     targetUnlock = needUnlock;
 }
 
-void GazeComunicator::setTarget(int num, double &x, double &y, bool needUnlock)
+void GazeComunicator::setTarget(const int &num, const double &x, const double &y)
 {
     GPmutex.lock();
     targetNum = num;
     targetX = x;
     targetY = y;
-    targetUnlock = needUnlock;
-    targetFound = false;
+    targetPending = true;
     GPmutex.unlock();
 }
 
@@ -77,14 +85,22 @@ void GazeComunicator::MsgLoop()
     while(!stopThread){
         GP->get_rx(buffer);
         for(auto &&data: buffer){
+            if(data.at(0) != '<') break; // if data doesnt start with '<'
             std::map<std::string, double> temp = std::move(parser->parseData(data));
             logger->logGaze(temp);
-            if(!targetFound)
+            GPmutex.lock();
+            if(targetPending){
                 if(fabs(temp["BPOGX"] - targetX) < targetPerimeterX && fabs(temp["BPOGY"] - targetY) < targetPerimeterY){
-                    targetFound = true;
+                    targetPending = false;
                     logger->logEvent(targetNum, temp["CNT"], temp["TIME"]);
                     if(targetUnlock) emit targetReached();
                 }
+            }
+            if(customEventPending){
+                logger->logEvent(customEventNum, temp["CNT"], temp["TIME"]);
+                customEventPending = false;
+            }
+            GPmutex.unlock();
         }
 
     }

@@ -1,9 +1,6 @@
 #ifndef GAZECOMUNICATOR_H
 #define GAZECOMUNICATOR_H
 
-#include "GPClient.h"
-#include "gplogger.h"
-
 #include <QObject>
 #include <QDebug>
 #include <QThread>
@@ -12,18 +9,23 @@
 
 #include <utility>
 
+#include "GPClient.h"
+#include "gplogger.h"
 
 class GazeComunicator : public QObject
 {
     Q_OBJECT
 private:
     int targetNum;
+    int customEventNum;
     double targetX;
     double targetY;
     double targetPerimeterX;
     double targetPerimeterY;
     bool targetUnlock;
-    bool targetFound = true;
+
+    bool targetPending = false;
+    bool customEventPending = false;
 
     GPClient* GP;
     GPLogger* logger;
@@ -36,11 +38,12 @@ public:
     ~GazeComunicator();
     void Start();
     void Stop();
-    void startLog(QString folder, QString name);
+    void startLog(const QString &folder, const QString &name);
     void stopLog();
 
-    void setPerimeter(double perimeterX, double perimeterY);
-    void setTarget(int num, double &x, double &y, bool needUnlock = false);
+    void logCustomEvent(const int &eventNum);
+    void setPerimeter(const double &perimeterX, const double &perimeterY, const bool &needUnlock = false);
+    void setTarget(const int &num, const double &x, const double &y);
 
 public slots:
     void MsgLoop();
