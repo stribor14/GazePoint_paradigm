@@ -17,7 +17,7 @@ public:
     void startLog(const QString &folder, const QString &name);
     void stopLog();
     void logGaze(const std::map<std::string, double> &data);
-    void logEvent(const int &eventNumber,const int &gazeID, const double &gazeTime);
+    void logEvent(const std::string &eventDescriptor, const double &eventNumber, const double &data1, const double &data2);
 
 private:
     std::ofstream logFile;

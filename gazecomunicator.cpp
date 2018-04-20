@@ -1,7 +1,5 @@
 #include "gazecomunicator.h"
 
-QMutex GPmutex;
-
 GazeComunicator::GazeComunicator(QObject * parent) : QObject(parent)
 {
     GP = new GPClient();
@@ -54,12 +52,9 @@ void GazeComunicator::stopLog()
     logger->stopLog();
 }
 
-void GazeComunicator::logCustomEvent(const int &eventNum)
+void GazeComunicator::logCustomEvent(const std::string &eventDescriptor, const double &eventNumber, const double &data1, const double &data2)
 {
-    GPmutex.lock();
-    customEventNum = eventNum;
-    customEventPending = true;
-    GPmutex.unlock();
+    logger->logEvent(eventDescriptor, eventNumber, data1, data2);
 }
 
 void GazeComunicator::setPerimeter(const double &perimeterX, const double &perimeterY, const bool &needUnlock)
@@ -71,12 +66,11 @@ void GazeComunicator::setPerimeter(const double &perimeterX, const double &perim
 
 void GazeComunicator::setTarget(const int &num, const double &x, const double &y)
 {
-    GPmutex.lock();
     targetNum = num;
     targetX = x;
     targetY = y;
     targetPending = true;
-    GPmutex.unlock();
+    qDebug() << x << y << num << targetPending;
 }
 
 void GazeComunicator::MsgLoop()
@@ -87,20 +81,15 @@ void GazeComunicator::MsgLoop()
         for(auto &&data: buffer){
             if(data.at(0) != '<') break; // if data doesnt start with '<'
             std::map<std::string, double> temp = std::move(parser->parseData(data));
+            if(temp["valid"] == 0) continue;
             logger->logGaze(temp);
-            GPmutex.lock();
             if(targetPending){
                 if(fabs(temp["BPOGX"] - targetX) < targetPerimeterX && fabs(temp["BPOGY"] - targetY) < targetPerimeterY){
                     targetPending = false;
-                    logger->logEvent(targetNum, temp["CNT"], temp["TIME"]);
+                    logger->logEvent("RED_DOT", targetNum, temp["CNT"], temp["TIME"]);
                     if(targetUnlock) emit targetReached();
                 }
             }
-            if(customEventPending){
-                logger->logEvent(customEventNum, temp["CNT"], temp["TIME"]);
-                customEventPending = false;
-            }
-            GPmutex.unlock();
         }
 
     }

@@ -3,23 +3,43 @@
 QDot::QDot(int x, int y, int size, QBrush color, double angle) : QGraphicsEllipseItem(){
     dotSize = size;
     dotAngle = angle;
-    this->setRect(x,y,dotSize,dotSize);
+    this->setRect(x - dotSize/2, y - dotSize/2, dotSize, dotSize);
     this->setBrush(color);
 }
 
-bool QDot::isTarget(){return target;}
-
-void QDot::setTarget(const bool &state){target = state;}
-
-void QDot::setCord(const int &x, const int &y){
-    this->setRect(x,y,dotSize,dotSize);
+bool QDot::isTarget(){
+    return target;
 }
 
-void QDot::setAngle(const double &angle){dotAngle = angle;}
+void QDot::setTarget(const bool &state){
+    target = state
+            ;}
 
-double QDot::getAngle(){return dotAngle;}
+void QDot::setSize(const int &size)
+{
+    dotSize = size;
+}
 
-double QDot::getDist(){return oldDist;}
+void QDot::setCord(const int &x, const int &y){
+    this->setRect(x - dotSize/2, y - dotSize/2, dotSize, dotSize);
+}
+
+void QDot::setAngle(const double &angle){
+    dotAngle = angle;
+}
+
+double QDot::getAngle(){
+    return dotAngle;
+}
+
+double QDot::getDist(){
+    return oldDist;
+}
+
+int QDot::getResult()
+{
+    return this->brush() == QBrush(Qt::green) ? 1 : this->brush() == QBrush(Qt::yellow) ? -1 : 0;
+}
 
 void QDot::moveDot(const double &angle, const double &dist){
     dotAngle += angle;

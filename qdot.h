@@ -20,10 +20,12 @@ public:
     bool isTarget();
     void setTarget(const bool &state);
 
+    void setSize(const int &size);
     void setCord(const int &x, const int &y);
     void setAngle(const double &angle);
     double getAngle();
     double getDist();
+    int getResult();
     void moveDot(const double &angle, const double &dist);
 
 protected:

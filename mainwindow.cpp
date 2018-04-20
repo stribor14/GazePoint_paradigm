@@ -45,6 +45,12 @@ MainWindow::MainWindow(QWidget *parent) :
     red_dot = new QDot(0, 0, readLine(i_dotSize), QBrush(Qt::red), 0);
     center_dot = new QDot(0, 0, readLine(i_dotSize), QBrush(Qt::white), 0);
 
+    connect(ui->i_dotSize, &QLineEdit::editingFinished, [&](){
+       red_dot->setSize(readLine(i_dotSize));
+       center_dot->setSize(readLine(i_dotSize));
+       for(auto &&dot: octaDot) dot->setSize(readLine(i_dotSize));
+    });
+
     for (int k = 0; k < 8; k++){
         octaDot.append(new QDot(0, 0, readLine(i_dotSize), QBrush(Qt::white), generator_normal() + k * pi/2));
     }
@@ -83,6 +89,7 @@ MainWindow::MainWindow(QWidget *parent) :
         }
 
         bool temp_useGaze = ui->i_gazePoint->isChecked();
+        int temp_taskNum = ui->i_numDynamicTask->value();
 
         QRect &&screenres = ui->i_screenBox->currentData().toRect();
 
@@ -100,13 +107,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
         resetRandom();
         runStaticSegment(temp_useGaze);
-        runDynamicSegment(1);
+        runDynamicSegment(1, temp_taskNum);
         resetRandom();
         runStaticSegment(temp_useGaze);
-        runDynamicSegment(2);
+        runDynamicSegment(2, temp_taskNum);
         resetRandom();
         runStaticSegment(temp_useGaze);
-        runDynamicSegment(3);
+        runDynamicSegment(3, temp_taskNum);
         resetRandom();
         runStaticSegment(temp_useGaze);
 
@@ -162,13 +169,11 @@ void MainWindow::runStaticSegment(const bool &useGaze)
 
     if (useGaze){
         // NEW DOT AFTER GAZE FIXATION
-        connect(GazePt, &GazeComunicator::targetReached, [&](){
-            double newX = generator_uniform();
-            double newY = generator_uniform();
-            red_dot->setCord(newX * dispWidth, newY * dispHeight);
-            GazePt->setTarget(targetNum++, newX, newY);
-            dispScene->update();
-        });
+        connect(GazePt, &GazeComunicator::targetReached,this, [&](){
+            QPair<double, double> newCords = std::move(generateNewCords());
+            red_dot->setCord(newCords.first, newCords.second);
+            GazePt->setTarget(targetNum++, newCords.first/dispWidth, newCords.second/dispHeight);
+        }, Qt::QueuedConnection);
         red_dot->setCord(dispWidth/2, dispHeight/2);
         GazePt->setTarget(targetNum++, 0.5, 0.5);
         dispScene->addItem(red_dot);
@@ -176,10 +181,9 @@ void MainWindow::runStaticSegment(const bool &useGaze)
     else{
         // NEW DOT AFTER FIXED TIME
         connect(&cyclicTimer, &QTimer::timeout,[&](){
-            double newX = generator_uniform();
-            double newY = generator_uniform();
-            red_dot->setCord(newX * dispWidth, newY * dispHeight);
-            GazePt->setTarget(targetNum++, newX, newY);
+            QPair<double, double> newCords = std::move(generateNewCords());
+            red_dot->setCord(newCords.first, newCords.second);
+            GazePt->setTarget(targetNum++, newCords.first/dispWidth, newCords.second/dispHeight);
         });
         red_dot->setCord(dispWidth/2, dispHeight/2);
         GazePt->setTarget(targetNum++, 0.5, 0.5);
@@ -191,66 +195,80 @@ void MainWindow::runStaticSegment(const bool &useGaze)
     tempLoop.exec();
 }
 
-void MainWindow::runDynamicSegment(const int &lvl)
+void MainWindow::runDynamicSegment(const int &lvl, const int &taskNum)
 {
     QEventLoop tempLoop;
 
-    GazePt->logCustomEvent(99990 + lvl);
+    for(int k = 1; k <= taskNum; k++){
 
-    // part 1
-    center_dot->setCord(dispWidth/2, dispHeight/2);
-    dispScene->addItem(center_dot);
-    runTimer.singleShot(readLine(i_timeDynamicCenter),Qt::PreciseTimer,[&](){
-        dispScene->removeItem(center_dot);
-        tempLoop.quit();
-    });
-    tempLoop.exec();
+        GazePt->logCustomEvent("DYN_START", lvl + k/10.0, 0, 0);
 
-    // part 2
-    QList<int> greenIndex = octaColor(lvl);
+        // part 1
+        center_dot->setCord(dispWidth/2, dispHeight/2);
+        dispScene->addItem(center_dot);
+        runTimer.singleShot(readLine(i_timeDynamicCenter),Qt::PreciseTimer,[&](){
+            dispScene->removeItem(center_dot);
+            tempLoop.quit();
+        });
+        tempLoop.exec();
 
-    for(int k=0; k<8; k++){
-        octaDot[k]->setCord(dispWidth/2 + cos(k*pi/4) * readLine(i_dotOctaOffset),
-                            dispHeight/2 + sin(k*pi/4) * readLine(i_dotOctaOffset));
-        dispScene->addItem(octaDot[k]);
-    }
-    runTimer.singleShot(readLine(i_timeDynamicOctagon),Qt::PreciseTimer,[&](){
-        octaColor(0);
-        tempLoop.quit();
-    });
-    tempLoop.exec();
-
-    // part 3
-    octaReset();
-    connect(&cyclicTimer, &QTimer::timeout, [&](){
-        for(auto &&dot: octaDot)
-            dot->moveDot(generator_uniform()*2*pi, generator_uniform() * maxDist);
-        octaCollisionCheck();
-    });
-
-    cyclicTimer.start(1000/30);
-    runTimer.singleShot(readLine(i_timeDynamicMovement),Qt::PreciseTimer,[&](){
-        cyclicTimer.disconnect();
-        cyclicTimer.stop();
-        tempLoop.quit();
-    });
-    tempLoop.exec();
-
-    // part 4
-    runTimer.singleShot(readLine(i_timeDynamicUserInput),Qt::PreciseTimer,[&](){
-        for(auto &&dot: octaDot){
-            dot->acceptMouse = false;
-            dispScene->removeItem(dot);
+        // part 2
+        for(int k=0; k<8; k++){
+            octaDot[k]->setCord(dispWidth/2 + cos(k*pi/4) * readLine(i_dotOctaOffset),
+                                dispHeight/2 + sin(k*pi/4) * readLine(i_dotOctaOffset));
+            dispScene->addItem(octaDot[k]);
         }
-        tempLoop.quit();
-    });
-    for(auto &&dot: octaDot) dot->acceptMouse = true;
+        runTimer.singleShot(readLine(i_timeDynamicOctagon),Qt::PreciseTimer,[&](){
+            octaColor(0);
+            tempLoop.quit();
+        });
+        tempLoop.exec();
 
-    tempLoop.exec();
-    GazePt->logCustomEvent(99990 + lvl + 5);
+        // part 3
+        octaReset();
+        connect(&cyclicTimer, &QTimer::timeout, [&](){
+            for(auto &&dot: octaDot)
+                dot->moveDot(generator_uniform()*2*pi,generator_uniform() * maxDist);
+                //dot->moveDot(0, 15); //
+            octaCollisionCheck();
+        });
+
+        cyclicTimer.start(1000/30);
+        runTimer.singleShot(readLine(i_timeDynamicMovement),Qt::PreciseTimer,[&](){
+            cyclicTimer.disconnect();
+            cyclicTimer.stop();
+            tempLoop.quit();
+        });
+        tempLoop.exec();
+
+        // part 4
+        int resF = 0;
+        int resT = 0;
+        runTimer.singleShot(readLine(i_timeDynamicUserInput),Qt::PreciseTimer,[&](){
+            for(auto &&dot: octaDot){
+                int temp = dot->getResult();
+                (temp == 1 ? resT : resF) += temp;
+                dot->acceptMouse = false;
+                dispScene->removeItem(dot);
+            }
+            tempLoop.quit();
+        });
+        for(auto &&dot: octaDot) dot->acceptMouse = true;
+
+        tempLoop.exec();
+        GazePt->logCustomEvent("DYN_END", lvl + k/10.0, resT, -resF);
+    }
 }
 
-QList<int> MainWindow::octaColor(const int &lvl)
+QPair<double, double> MainWindow::generateNewCords()
+{
+    int dispPadding = 200;
+    double newX = generator_uniform() * (dispWidth - 2*dispPadding) + dispPadding;
+    double newY = generator_uniform() * (dispHeight - 2*dispPadding) + dispPadding;
+    return QPair<double, double>(newX, newY);
+}
+
+void MainWindow::octaColor(const int &lvl)
 {
     QList<int> greenIndex;
     for(auto &&dot: octaDot) dot->setBrush(QBrush(Qt::white));
@@ -280,7 +298,6 @@ QList<int> MainWindow::octaColor(const int &lvl)
             octaDot[index]->setBrush(QBrush(Qt::green));
         }
     }
-    return greenIndex;
 }
 
 void MainWindow::octaReset()
@@ -290,27 +307,28 @@ void MainWindow::octaReset()
 
 void MainWindow::octaCollisionCheck()
 {
+    int padding = readLine(i_dotSize);
     for(auto &&dot: octaDot){
         QRectF temp = dot->rect();
         double angle = fmod(dot->getAngle(),2*pi);
         angle += angle < -pi ? 2*pi : (angle > pi ? -2*pi : 0);
 
-        if (temp.x()-readLine(i_dotSize) <= 0){
+        if (temp.x()-padding <= 0){
                 dot->setAngle(pi-angle);
-                dot->moveDot(0, readLine(i_dotSize)-temp.x());
+                dot->moveDot(0, padding-temp.x());
         }
-        if (temp.x()+2*readLine(i_dotSize) >= dispWidth){
+        if (temp.x()+ readLine(i_dotSize) + padding >= dispWidth){
                 dot->setAngle(pi-angle);
-                dot->moveDot(0, temp.x()+2*readLine(i_dotSize) - dispWidth);
+                dot->moveDot(0, temp.x()+ readLine(i_dotSize) + padding - dispWidth);
         }
 
-        if (temp.y()-readLine(i_dotSize) <= 0){
+        if (temp.y()-padding <= 0){
                 dot->setAngle(-angle);
-                dot->moveDot(0, readLine(i_dotSize)-temp.y());
+                dot->moveDot(0, padding-temp.y());
         }
-        if (temp.y()+2*readLine(i_dotSize) >= dispHeight){
+        if (temp.y()+ readLine(i_dotSize) + padding >= dispHeight){
                 dot->setAngle(-angle);
-                dot->moveDot(0, temp.y()+2*readLine(i_dotSize) - dispHeight);
+                dot->moveDot(0, temp.y()+ readLine(i_dotSize) + padding - dispHeight);
         }
     }
     for (int k = 0; k<8 ; k++){

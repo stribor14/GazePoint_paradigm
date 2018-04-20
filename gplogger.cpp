@@ -16,7 +16,7 @@ void GPLogger::startLog(const QString &folder, const QString &name)
     for(auto &&key: keys)
         logFile << key << ";" ;
     logFile << "\n";
-    eventFile << "TARGET_NUM;GAZE_ID;GAZE_TIME;\n";
+    eventFile << "EVENT;EVENT_NUM;DATA_1;DATA_2;\n";
 }
 
 void GPLogger::stopLog()
@@ -32,10 +32,10 @@ void GPLogger::logGaze(const std::map<std::string, double> &data)
     logFile << "\n";
 }
 
-void GPLogger::logEvent(const int &eventNumber, const int &gazeID, const double &gazeTime)
+void GPLogger::logEvent(const std::string &eventDescriptor, const double &eventNumber, const double &data1, const double &data2)
 {
-    eventFile << eventNumber << ";" << gazeID << ";" << gazeTime << "\n" ;
-    qDebug() << eventNumber << ";" << gazeID << ";" << gazeTime;
+    eventFile << eventDescriptor << ";" << eventNumber << ";" << data1 << ";" << data2 << ";\n" ;
+    qDebug() << eventDescriptor.c_str() << ";" << eventNumber << ";" << data1 << ";" << data2;
 }
 
 
@@ -67,7 +67,7 @@ std::map<std::string, double> GPDataParser::parseData(const std::string &data)
     else {
         temp["valid"] = 1;
         for(auto &&key: keys){
-            size_t t_1 = data.find(key);
+            size_t t_1 = data.find(key, 0);
             size_t t_2 = data.find("\"", t_1)+1;
             size_t t_3 = data.find("\"", t_2);
             //qDebug() << key.c_str() << data.substr(t_2, t_3-t_2).c_str();

@@ -41,7 +41,7 @@ public:
     void startLog(const QString &folder, const QString &name);
     void stopLog();
 
-    void logCustomEvent(const int &eventNum);
+    void logCustomEvent(const string &eventDescriptor, const double &eventNumber, const double &data1, const double &data2);
     void setPerimeter(const double &perimeterX, const double &perimeterY, const bool &needUnlock = false);
     void setTarget(const int &num, const double &x, const double &y);
 

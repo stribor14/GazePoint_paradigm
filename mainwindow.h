@@ -17,7 +17,11 @@
 #include <QScreen>
 #include <QPalette>
 #include <QTimer>
+#include <QPair>
 #include <QEventLoop>
+
+#include <QtConcurrent/QtConcurrentRun>
+#include <QFuture>
 
 #include "gazecomunicator.h"
 #include "qdot.h"
@@ -45,7 +49,7 @@ private:
     QTimer runTimer;
     QTimer cyclicTimer;
 
-    int maxDist = 15;
+    int maxDist = 25;
 
     int dispWidth;
     int dispHeight;
@@ -55,9 +59,11 @@ private:
     QList<QDot*> octaDot;
 
     void runStaticSegment(const bool &useGaze=false);
-    void runDynamicSegment(const int &lvl);
+    void runDynamicSegment(const int &lvl, const int &taskNum);
 
-    QList<int> octaColor(const int &lvl);
+    QPair<double, double> generateNewCords();
+
+    void octaColor(const int &lvl);
     void octaReset();
     void octaCollisionCheck();
 };
