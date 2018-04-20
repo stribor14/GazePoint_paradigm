@@ -493,7 +493,7 @@
      <string>Direktorij za spremanje logova:</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="i_gazePoint_2">
+   <widget class="QCheckBox" name="i_write_log">
     <property name="geometry">
      <rect>
       <x>100</x>

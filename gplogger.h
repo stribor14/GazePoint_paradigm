@@ -13,15 +13,17 @@
 class GPLogger
 {
 public:
-    GPLogger();
+    GPLogger() = default;
     void startLog(const QString &folder, const QString &name);
     void stopLog();
     void logGaze(const std::map<std::string, double> &data);
-    void logEvent(const std::string &eventDescriptor, const double &eventNumber, const double &data1, const double &data2);
+    void logEvent(const std::string &eventDescriptor, double eventNumber, double data1, double data2, double data3 = 0, double data4 = 0);
 
 private:
     std::ofstream logFile;
     std::ofstream eventFile;
+
+    bool isStarted = false;
 };
 
 

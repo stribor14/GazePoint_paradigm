@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->b_log_folder->setIcon(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon));
     ui->w_warning->setPixmap(QApplication::style()->standardPixmap(QStyle::SP_MessageBoxWarning));
+    ui->i_log_folder->setText(QDir::currentPath());
 
     dispView = new QGraphicsView(secondDisplay);
     dispScene = new QGraphicsScene(dispView);
@@ -36,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     secondDisplay->layout()->addWidget(dispView);
     secondDisplay->layout()->setMargin(0);
     secondDisplay->setPalette(pal);
-    dispView->setStyleSheet("border: 0px solid black");
+    dispView->setStyleSheet(tr("border: 0px solid black"));
     dispView->setScene(dispScene);
     dispView->setPalette(pal);
     dispView->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
@@ -45,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     red_dot = new QDot(0, 0, readLine(i_dotSize), QBrush(Qt::red), 0);
     center_dot = new QDot(0, 0, readLine(i_dotSize), QBrush(Qt::white), 0);
 
-    connect(ui->i_dotSize, &QLineEdit::editingFinished, [&](){
+    connect(ui->i_dotSize, &QLineEdit::editingFinished, this, [&](){
        red_dot->setSize(readLine(i_dotSize));
        center_dot->setSize(readLine(i_dotSize));
        for(auto &&dot: octaDot) dot->setSize(readLine(i_dotSize));
@@ -62,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->i_screenBox->insertItem(0,screen->name().remove(0,4),screen->geometry());
     }
 
-    connect(ui->b_test, &QPushButton::clicked,[&](){
+    connect(ui->b_test, &QPushButton::clicked, this, [&](){
         QRect &&screenres = ui->i_screenBox->currentData().toRect();
         secondDisplay->move(QPoint(screenres.x(), screenres.y()));
         secondDisplay->resize(screenres.width(), screenres.height());
@@ -80,7 +81,7 @@ MainWindow::MainWindow(QWidget *parent) :
         });
     });
 
-    connect(ui->b_pokreni, &QPushButton::clicked,[&](){
+    connect(ui->b_pokreni, &QPushButton::clicked, this, [&](){
 
         if(!ui->i_participant->text().compare("")){
             QMessageBox::warning(this, "Greška",
@@ -100,7 +101,7 @@ MainWindow::MainWindow(QWidget *parent) :
         dispHeight = screenres.height();
         dispScene->setSceneRect(0,0,dispWidth, dispHeight);
 
-        GazePt->startLog(ui->i_log_folder->text(), ui->i_participant->text());
+        if(ui->i_write_log->isChecked()) GazePt->startLog(ui->i_log_folder->text(), ui->i_participant->text());
         GazePt->setPerimeter((100.0 / dispWidth), (100.0 / dispHeight), temp_useGaze);
 
         secondDisplay->showFullScreen();
@@ -119,19 +120,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
         secondDisplay->close();
 
-        GazePt->stopLog();
+        if(ui->i_write_log->isChecked()) GazePt->stopLog();
     });
 
-    connect(ui->b_izlaz, &QPushButton::clicked, [&](){
+    connect(ui->b_izlaz, &QPushButton::clicked, this, [&](){
         secondDisplay->close();
         this->close();
     });
 
-    connect(ui->i_gazePoint, &QCheckBox::toggled, [&](){
+    connect(ui->i_gazePoint, &QCheckBox::toggled, this, [&](){
        ui->i_timeStaticDot->setDisabled(ui->i_gazePoint->isChecked());
     });
 
-    connect(ui->b_log_folder, &QPushButton::clicked, [&](){
+    connect(ui->b_log_folder, &QPushButton::clicked, this, [&](){
         ui->i_log_folder->setText(
                     QFileDialog::getExistingDirectory(this, tr("Open Directory"),
                                                         ui->i_log_folder->text(),
@@ -149,9 +150,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::runStaticSegment(const bool &useGaze)
+void MainWindow::runStaticSegment(bool useGaze)
 {
-    int targetNum = 1;
+    targetNum = 1;
 
     QEventLoop tempLoop;
 
@@ -170,7 +171,7 @@ void MainWindow::runStaticSegment(const bool &useGaze)
     if (useGaze){
         // NEW DOT AFTER GAZE FIXATION
         connect(GazePt, &GazeComunicator::targetReached,this, [&](){
-            QPair<double, double> newCords = std::move(generateNewCords());
+            QPair<double, double> newCords = generateNewCords();
             red_dot->setCord(newCords.first, newCords.second);
             GazePt->setTarget(targetNum++, newCords.first/dispWidth, newCords.second/dispHeight);
         }, Qt::QueuedConnection);
@@ -180,8 +181,8 @@ void MainWindow::runStaticSegment(const bool &useGaze)
     }
     else{
         // NEW DOT AFTER FIXED TIME
-        connect(&cyclicTimer, &QTimer::timeout,[&](){
-            QPair<double, double> newCords = std::move(generateNewCords());
+        connect(&cyclicTimer, &QTimer::timeout, this, [&](){
+            QPair<double, double> newCords = generateNewCords();
             red_dot->setCord(newCords.first, newCords.second);
             GazePt->setTarget(targetNum++, newCords.first/dispWidth, newCords.second/dispHeight);
         });
@@ -195,13 +196,14 @@ void MainWindow::runStaticSegment(const bool &useGaze)
     tempLoop.exec();
 }
 
-void MainWindow::runDynamicSegment(const int &lvl, const int &taskNum)
+void MainWindow::runDynamicSegment(int lvl, int taskNum)
 {
     QEventLoop tempLoop;
 
     for(int k = 1; k <= taskNum; k++){
 
         GazePt->logCustomEvent("DYN_START", lvl + k/10.0, 0, 0);
+        GazePt->setTarget(0, 0.5, 0.5);
 
         // part 1
         center_dot->setCord(dispWidth/2, dispHeight/2);
@@ -213,6 +215,7 @@ void MainWindow::runDynamicSegment(const int &lvl, const int &taskNum)
         tempLoop.exec();
 
         // part 2
+        octaColor(lvl);
         for(int k=0; k<8; k++){
             octaDot[k]->setCord(dispWidth/2 + cos(k*pi/4) * readLine(i_dotOctaOffset),
                                 dispHeight/2 + sin(k*pi/4) * readLine(i_dotOctaOffset));
@@ -226,7 +229,7 @@ void MainWindow::runDynamicSegment(const int &lvl, const int &taskNum)
 
         // part 3
         octaReset();
-        connect(&cyclicTimer, &QTimer::timeout, [&](){
+        connect(&cyclicTimer, &QTimer::timeout, this, [&](){
             for(auto &&dot: octaDot)
                 dot->moveDot(generator_uniform()*2*pi,generator_uniform() * maxDist);
                 //dot->moveDot(0, 15); //
@@ -262,13 +265,12 @@ void MainWindow::runDynamicSegment(const int &lvl, const int &taskNum)
 
 QPair<double, double> MainWindow::generateNewCords()
 {
-    int dispPadding = 200;
     double newX = generator_uniform() * (dispWidth - 2*dispPadding) + dispPadding;
     double newY = generator_uniform() * (dispHeight - 2*dispPadding) + dispPadding;
     return QPair<double, double>(newX, newY);
 }
 
-void MainWindow::octaColor(const int &lvl)
+void MainWindow::octaColor(int lvl)
 {
     QList<int> greenIndex;
     for(auto &&dot: octaDot) dot->setBrush(QBrush(Qt::white));
@@ -307,28 +309,27 @@ void MainWindow::octaReset()
 
 void MainWindow::octaCollisionCheck()
 {
-    int padding = readLine(i_dotSize);
     for(auto &&dot: octaDot){
         QRectF temp = dot->rect();
         double angle = fmod(dot->getAngle(),2*pi);
         angle += angle < -pi ? 2*pi : (angle > pi ? -2*pi : 0);
 
-        if (temp.x()-padding <= 0){
+        if (temp.x()-dispPadding <= 0){
                 dot->setAngle(pi-angle);
-                dot->moveDot(0, padding-temp.x());
+                dot->moveDot(0, dispPadding-temp.x());
         }
-        if (temp.x()+ readLine(i_dotSize) + padding >= dispWidth){
+        if (temp.x()+ readLine(i_dotSize) + dispPadding >= dispWidth){
                 dot->setAngle(pi-angle);
-                dot->moveDot(0, temp.x()+ readLine(i_dotSize) + padding - dispWidth);
+                dot->moveDot(0, temp.x()+ readLine(i_dotSize) + dispPadding - dispWidth);
         }
 
-        if (temp.y()-padding <= 0){
+        if (temp.y()-dispPadding <= 0){
                 dot->setAngle(-angle);
-                dot->moveDot(0, padding-temp.y());
+                dot->moveDot(0, dispPadding-temp.y());
         }
-        if (temp.y()+ readLine(i_dotSize) + padding >= dispHeight){
+        if (temp.y()+ readLine(i_dotSize) + dispPadding >= dispHeight){
                 dot->setAngle(-angle);
-                dot->moveDot(0, temp.y()+ readLine(i_dotSize) + padding - dispHeight);
+                dot->moveDot(0, temp.y()+ readLine(i_dotSize) + dispPadding - dispHeight);
         }
     }
     for (int k = 0; k<8 ; k++){

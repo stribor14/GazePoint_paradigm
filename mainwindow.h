@@ -35,8 +35,8 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow() override;
 
 private:
     Ui::MainWindow *ui;
@@ -50,20 +50,22 @@ private:
     QTimer cyclicTimer;
 
     int maxDist = 25;
+    int targetNum;
 
     int dispWidth;
     int dispHeight;
+    int dispPadding = 150;
 
     QDot* red_dot;
     QDot* center_dot;
     QList<QDot*> octaDot;
 
-    void runStaticSegment(const bool &useGaze=false);
-    void runDynamicSegment(const int &lvl, const int &taskNum);
+    void runStaticSegment(bool useGaze=false);
+    void runDynamicSegment(int lvl, int taskNum);
 
     QPair<double, double> generateNewCords();
 
-    void octaColor(const int &lvl);
+    void octaColor(int lvl);
     void octaReset();
     void octaCollisionCheck();
 };
