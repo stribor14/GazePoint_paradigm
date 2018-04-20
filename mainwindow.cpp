@@ -105,6 +105,7 @@ MainWindow::MainWindow(QWidget *parent) :
         GazePt->setPerimeter((100.0 / dispWidth), (100.0 / dispHeight), temp_useGaze);
 
         secondDisplay->showFullScreen();
+        secondDisplay->setCursor(Qt::BlankCursor);
 
         resetRandom();
         runStaticSegment(temp_useGaze);
@@ -149,10 +150,6 @@ MainWindow::~MainWindow()
 
     delete GazePt;
     delete secondDisplay;
-
-    delete red_dot;
-    delete center_dot;
-    for(auto &&dot: octaDot) delete dot;
 
     delete ui;
 }
@@ -238,8 +235,8 @@ void MainWindow::runDynamicSegment(int lvl, int taskNum)
         octaReset();
         connect(&cyclicTimer, &QTimer::timeout, this, [&](){
             for(auto &&dot: octaDot)
-                dot->moveDot(generator_uniform()*2*pi,generator_uniform() * maxDist);
-                //dot->moveDot(0, 15); //
+                //dot->moveDot(generator_uniform()*2*pi,generator_uniform() * maxDist);
+                dot->moveDot(0, 15);
             octaCollisionCheck();
         });
 
@@ -255,16 +252,18 @@ void MainWindow::runDynamicSegment(int lvl, int taskNum)
         int resF = 0;
         int resT = 0;
         runTimer.singleShot(readLine(i_timeDynamicUserInput),Qt::PreciseTimer,[&](){
+            secondDisplay->setCursor(Qt::ArrowCursor);
             for(auto &&dot: octaDot){
                 int temp = dot->getResult();
                 (temp == 1 ? resT : resF) += temp;
                 dot->acceptMouse = false;
                 dispScene->removeItem(dot);
             }
+            secondDisplay->setCursor(Qt::BlankCursor);
             tempLoop.quit();
         });
         for(auto &&dot: octaDot) dot->acceptMouse = true;
-
+        secondDisplay->setCursor(Qt::ArrowCursor);
         tempLoop.exec();
         GazePt->logCustomEvent("DYN_END", lvl + k/10.0, resT, -resF);
     }
