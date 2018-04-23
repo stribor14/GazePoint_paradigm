@@ -1,8 +1,7 @@
 #include "qdot.h"
 
-QDot::QDot(int x, int y, int size, QBrush color, double angle) : QGraphicsEllipseItem(){
+QDot::QDot(int x, int y, int size, QBrush color) : QGraphicsEllipseItem(){
     dotSize = size;
-    dotAngle = angle;
     this->setRect(x - dotSize/2, y - dotSize/2, dotSize, dotSize);
     this->setBrush(color);
 }
@@ -28,12 +27,22 @@ void QDot::setAngle(const double &angle){
     dotAngle = angle;
 }
 
+void QDot::setSpeed(const double &speed)
+{
+    dotSpeed = speed;
+}
+
 double QDot::getAngle(){
     return dotAngle;
 }
 
 double QDot::getDist(){
     return oldDist;
+}
+
+double QDot::getSpeed()
+{
+    return dotSpeed;
 }
 
 int QDot::getResult()
@@ -45,8 +54,8 @@ void QDot::moveDot(const double &angle, const double &dist){
     dotAngle += angle;
     QRectF tempCurrent = this->rect();
     oldDist = dist;
-    this->setRect(tempCurrent.x() + cos(dotAngle)*dist,
-                  tempCurrent.y() + sin(dotAngle)*dist,
+    this->setRect(tempCurrent.x() + cos(dotAngle)*dist*dotSpeed,
+                  tempCurrent.y() + sin(dotAngle)*dist*dotSpeed,
                   dotSize, dotSize);
 }
 

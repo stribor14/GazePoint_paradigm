@@ -11,6 +11,9 @@
 #include <random>
 #include <functional>
 
+#include "gazecomunicator.h"
+#include "qdot.h"
+
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGuiApplication>
@@ -19,12 +22,7 @@
 #include <QTimer>
 #include <QPair>
 #include <QEventLoop>
-
-#include <QtConcurrent/QtConcurrentRun>
-#include <QFuture>
-
-#include "gazecomunicator.h"
-#include "qdot.h"
+#include <QOpenGLWidget>
 
 namespace Ui {
 class MainWindow;
@@ -58,16 +56,15 @@ private:
 
     QDot* red_dot;
     QDot* center_dot;
-    QList<QDot*> octaDot;
+    QList<QDot*> dynDot;
 
     void runStaticSegment(bool useGaze=false);
-    void runDynamicSegment(int lvl, int taskNum);
+    void runDynamicSegment(int lvl, int taskNum, int numDot);
 
     QPair<double, double> generateNewCords();
 
-    void octaColor(int lvl);
-    void octaReset();
-    void octaCollisionCheck();
+    void dynColor(int lvl, int numDot = 0);
+    void dynCollisionCheck(int numDot);
 };
 
 
