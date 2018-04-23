@@ -52,7 +52,9 @@ private:
 
     int dispWidth;
     int dispHeight;
+    QPoint dispCenter;
     int dispPadding = 150;
+
 
     QDot* red_dot;
     QDot* center_dot;

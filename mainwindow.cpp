@@ -24,7 +24,6 @@ MainWindow::MainWindow(QWidget *parent) :
     GazePt(new GazeComunicator)
 {
     ui->setupUi(this);
-
     ui->b_log_folder->setIcon(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon));
     ui->w_warning->setPixmap(QApplication::style()->standardPixmap(QStyle::SP_MessageBoxWarning));
     ui->i_log_folder->setText(QDir::currentPath());
@@ -100,13 +99,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
         dispWidth = screenres.width();
         dispHeight = screenres.height();
+        dispCenter = QPoint(screenres.center());
         dispScene->setSceneRect(0,0,dispWidth, dispHeight);
 
         if(ui->i_write_log->isChecked()) GazePt->startLog(ui->i_log_folder->text(), ui->i_participant->text());
         GazePt->setPerimeter((100.0 / dispWidth), (100.0 / dispHeight), temp_useGaze);
 
         secondDisplay->showFullScreen();
-        //TODO: set mouse pos
         secondDisplay->setCursor(Qt::BlankCursor);
 
         resetRandom();
@@ -241,7 +240,7 @@ void MainWindow::runDynamicSegment(int lvl, int taskNum, int numDot)
                 //dot->moveDot(generator_uniform()*2*pi,generator_uniform() * maxDist);
                 dynDot[k]->moveDot(0, 20);
             dynCollisionCheck(numDot);
-            dispView->update();
+           // dispView->update();
         });
 
         cyclicTimer.start(1000/60);
@@ -256,7 +255,6 @@ void MainWindow::runDynamicSegment(int lvl, int taskNum, int numDot)
         int resF = 0;
         int resT = 0;
         runTimer.singleShot(readLine(i_timeDynamicUserInput),Qt::PreciseTimer,[&](){
-            secondDisplay->setCursor(Qt::ArrowCursor);
             for(auto &&dot: dynDot){
                 int temp = dot->getResult();
                 (temp == 1 ? resT : resF) += temp;
@@ -266,8 +264,12 @@ void MainWindow::runDynamicSegment(int lvl, int taskNum, int numDot)
             secondDisplay->setCursor(Qt::BlankCursor);
             tempLoop.quit();
         });
+
         for(auto &&dot: dynDot) dot->acceptMouse = true;
-        secondDisplay->setCursor(Qt::ArrowCursor);
+        QCursor tempCursor = QCursor(Qt::ArrowCursor);
+        tempCursor.setPos(dispCenter);
+        secondDisplay->setCursor(tempCursor);
+
         tempLoop.exec();
         GazePt->logCustomEvent("DYN_END", lvl + k/10.0, resT, -resF);
     }
@@ -338,9 +340,10 @@ void MainWindow::dynCollisionCheck(int numDot)
         }
     }
     for (int k = 0; k<numDot ; k++){
-        QRectF temp1 = dynDot[k]->rect();
+        const QRectF &temp1 = dynDot[k]->rect();
         for (int i = k+1; i<numDot ; i++){
-            QRectF temp2 = dynDot[i]->rect();
+            const QRectF &temp2 = dynDot[i]->rect();
+            //if(dynDot[k]->collidesWithItem(dynDot[i]))
             if (m_dist(temp1, temp2) <= readLine(i_dotSize)){
                 double tempAngle = dynDot[k]->getAngle();
                 double tempSpeed = dynDot[k]->getSpeed();
@@ -351,6 +354,10 @@ void MainWindow::dynCollisionCheck(int numDot)
                 dynDot[i]->setSpeed(tempSpeed);
                 dynDot[k]->moveDot(0, dynDot[i]->getDist());
                 dynDot[i]->moveDot(0, oldDist);
+               // QPoint tempC1 = temp1.center();
+              //  QPoint tempC2 = temp2.center();
+//TODO: ATAN2 i makni koliziju
+                dynDot[k]
 
             }
         }
