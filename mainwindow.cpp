@@ -320,26 +320,17 @@ void MainWindow::dynCollisionCheck(int numDot)
         QPointF center = dynDot[k]->rect().center();
         double angle =  dynDot[k]->getAngle();
 
-        if (center.x() <= dispPadding){
-            dynDot[k]->setAngle(pi-angle);
-            dynDot[k]->moveDot(0, (dispPadding - center.x()) / cos(pi - angle));
-
-        }
-        if (center.x() >= dispWidth - dispPadding){
-            dynDot[k]->setAngle(pi-angle);
-            dynDot[k]->moveDot(0, (center.x() - (dispWidth - dispPadding)) / cos(angle));
-        }
-        if (center.y() <= dispPadding){
-            dynDot[k]->setAngle(-angle);
-            dynDot[k]->moveDot(0, (dispPadding - center.y()) / sin(-angle));
-        }
-        if (center.y() >= dispHeight - dispPadding){
-            dynDot[k]->setAngle(-angle);
-            dynDot[k]->moveDot(0, (center.y() - (dispHeight - dispPadding)) / sin(angle));
-        }
+        if (center.x() <= dispPadding)
+            dynDot[k]->moveDot(pi-2*angle, (dispPadding - center.x()) / cos(pi - angle));
+        if (center.x() >= dispWidth - dispPadding)
+            dynDot[k]->moveDot(pi-2*angle, (center.x() - (dispWidth - dispPadding)) / cos(angle));
+        if (center.y() <= dispPadding)
+            dynDot[k]->moveDot(-2*angle, (dispPadding - center.y()) / sin(-angle));
+        if (center.y() >= dispHeight - dispPadding)
+            dynDot[k]->moveDot(-2*angle, (center.y() - (dispHeight - dispPadding)) / sin(angle));
     }
     for (int k = 0; k<numDot ; k++){
-        for (int i = k+1; i<numDot ; i++){
+        for (int i = k + 1; i<numDot ; i++){
             if(dynDot[k]->collidesWithItem(dynDot[i])){
                 QPointF center1 = dynDot[k]->rect().center();
                 QPointF center2 = dynDot[i]->rect().center();
