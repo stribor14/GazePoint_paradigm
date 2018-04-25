@@ -29,14 +29,19 @@ SOURCES += \
         GPClient.cpp \
     gazecomunicator.cpp \
     qdot.cpp \
-    gplogger.cpp
+    gplogger.cpp \
+    dynsegment.cpp \
+    statsegment.cpp
 
 HEADERS += \
         mainwindow.h \
         GPClient.h \
     gazecomunicator.h \
     qdot.h \
-    gplogger.h
+    gplogger.h \
+    dynsegment.h \
+    statsegment.h \
+    globalheader.h
 
 FORMS += \
         mainwindow.ui

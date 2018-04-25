@@ -59,6 +59,15 @@ void QDot::moveDot(const double &angle, const double &dist){
                   dotSize, dotSize);
 }
 
+void QDot::moveDot(const double &dist)
+{
+    QRectF tempCurrent = this->rect();
+    oldDist = dist;
+    this->setRect(tempCurrent.x() + cos(dotAngle)*dist*dotSpeed,
+                  tempCurrent.y() + sin(dotAngle)*dist*dotSpeed,
+                  dotSize, dotSize);
+}
+
 void QDot::mousePressEvent(QGraphicsSceneMouseEvent *event){
     Q_UNUSED(event)
     if(!acceptMouse) return;

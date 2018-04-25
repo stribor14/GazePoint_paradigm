@@ -30,6 +30,7 @@ public:
     double getSpeed();
     int getResult();
     void moveDot(const double &angle, const double &dist);
+    void moveDot(const double &dist);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent * event);

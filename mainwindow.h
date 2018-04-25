@@ -7,12 +7,9 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include <cmath>
-#include <random>
-#include <functional>
-
 #include "gazecomunicator.h"
-#include "qdot.h"
+#include "dynsegment.h"
+#include "statsegment.h"
 
 #include <QGraphicsView>
 #include <QGraphicsScene>
@@ -44,8 +41,7 @@ private:
 
     GazeComunicator* GazePt;
 
-    QTimer runTimer;
-    QTimer cyclicTimer;
+
 
     int maxDist = 25;
     int targetNum;
@@ -55,18 +51,9 @@ private:
     QPoint dispCenter;
     double dispPadding = 150;
 
+    dynSegment* d_seg;
+    statSegment* s_seg;
 
-    QDot* red_dot;
-    QDot* center_dot;
-    QList<QDot*> dynDot;
-
-    void runStaticSegment(bool useGaze=false);
-    void runDynamicSegment(int lvl, int taskNum, int numDot);
-
-    QPair<double, double> generateNewCords();
-
-    void dynColor(int lvl, int numDot = 0);
-    void dynCollisionCheck(int numDot);
 };
 
 
