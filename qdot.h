@@ -22,7 +22,7 @@ public:
     void setTarget(const bool &state);
 
     void setSize(const int &size);
-    void setCord(const int &x, const int &y);
+    void setCord(const double &x, const double &y);
     void setAngle(const double &angle);
     void setSpeed(const double &speed);
     double getAngle();

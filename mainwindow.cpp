@@ -316,49 +316,45 @@ void MainWindow::dynColor(int lvl, int numDot)
 
 void MainWindow::dynCollisionCheck(int numDot)
 {
-    for(auto &&dot: dynDot){
-        QRectF temp = dot->rect();
-        double angle = fmod(dot->getAngle(),2*pi);
-        angle += angle < -pi ? 2*pi : (angle > pi ? -2*pi : 0);
+    for(int k = 0 ; k < numDot; k++){
+        QPointF center = dynDot[k]->rect().center();
+        double angle =  dynDot[k]->getAngle();
 
-        if (temp.x()-dispPadding <= 0){
-                dot->setAngle(pi-angle);
-                dot->moveDot(0, dispPadding-temp.x());
-        }
-        if (temp.x()+ readLine(i_dotSize) + dispPadding >= dispWidth){
-                dot->setAngle(pi-angle);
-                dot->moveDot(0, temp.x()+ readLine(i_dotSize) + dispPadding - dispWidth);
-        }
+        if (center.x() <= dispPadding){
+            dynDot[k]->setAngle(pi-angle);
+            dynDot[k]->moveDot(0, (dispPadding - center.x()) / cos(pi - angle));
 
-        if (temp.y()-dispPadding <= 0){
-                dot->setAngle(-angle);
-                dot->moveDot(0, dispPadding-temp.y());
         }
-        if (temp.y()+ readLine(i_dotSize) + dispPadding >= dispHeight){
-                dot->setAngle(-angle);
-                dot->moveDot(0, temp.y()+ readLine(i_dotSize) + dispPadding - dispHeight);
+        if (center.x() >= dispWidth - dispPadding){
+            dynDot[k]->setAngle(pi-angle);
+            dynDot[k]->moveDot(0, (center.x() - (dispWidth - dispPadding)) / cos(angle));
+        }
+        if (center.y() <= dispPadding){
+            dynDot[k]->setAngle(-angle);
+            dynDot[k]->moveDot(0, (dispPadding - center.y()) / sin(-angle));
+        }
+        if (center.y() >= dispHeight - dispPadding){
+            dynDot[k]->setAngle(-angle);
+            dynDot[k]->moveDot(0, (center.y() - (dispHeight - dispPadding)) / sin(angle));
         }
     }
     for (int k = 0; k<numDot ; k++){
-        const QRectF &temp1 = dynDot[k]->rect();
         for (int i = k+1; i<numDot ; i++){
-            const QRectF &temp2 = dynDot[i]->rect();
-            //if(dynDot[k]->collidesWithItem(dynDot[i]))
-            if (m_dist(temp1, temp2) <= readLine(i_dotSize)){
+            if(dynDot[k]->collidesWithItem(dynDot[i])){
+                QPointF center1 = dynDot[k]->rect().center();
+                QPointF center2 = dynDot[i]->rect().center();
+                double dist = (readLine(i_dotSize) - m_dist(center1, center2))/2;
+                double angle = m_angle(center1, center2);
                 double tempAngle = dynDot[k]->getAngle();
                 double tempSpeed = dynDot[k]->getSpeed();
-                double oldDist = dynDot[k]->getDist();
                 dynDot[k]->setAngle(dynDot[i]->getAngle());
                 dynDot[i]->setAngle(tempAngle);
                 dynDot[k]->setSpeed(dynDot[i]->getSpeed());
                 dynDot[i]->setSpeed(tempSpeed);
-                dynDot[k]->moveDot(0, dynDot[i]->getDist());
-                dynDot[i]->moveDot(0, oldDist);
-               // QPoint tempC1 = temp1.center();
-              //  QPoint tempC2 = temp2.center();
-//TODO: ATAN2 i makni koliziju
-                dynDot[k]
-
+                dynDot[k]->setCord(center1.x() + cos(angle)*dist,
+                                   center1.y() + sin(angle)*dist);
+                dynDot[i]->setCord(center2.x() - cos(angle)*dist,
+                                   center2.y() - sin(angle)*dist);
             }
         }
     }

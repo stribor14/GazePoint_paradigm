@@ -19,7 +19,7 @@ void QDot::setSize(const int &size)
     dotSize = size;
 }
 
-void QDot::setCord(const int &x, const int &y){
+void QDot::setCord(const double &x, const double &y){
     this->setRect(x - dotSize/2, y - dotSize/2, dotSize, dotSize);
 }
 
