@@ -6,35 +6,21 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    secondDisplay(new QWidget),
-    GazePt(new GazeComunicator)
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     ui->b_log_folder->setIcon(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon));
     ui->w_warning->setPixmap(QApplication::style()->standardPixmap(QStyle::SP_MessageBoxWarning));
     ui->i_log_folder->setText(QDir::currentPath());
 
-    dispView = new QGraphicsView(secondDisplay);
-    dispScene = new QGraphicsScene(dispView);
-    QPalette pal = palette();
-    pal.setColor(QPalette::Background, Qt::black);
-    secondDisplay->setLayout(new QVBoxLayout);
-    secondDisplay->layout()->addWidget(dispView);
-    secondDisplay->layout()->setMargin(0);
-    secondDisplay->setPalette(pal);
-    dispView->setViewport(new QOpenGLWidget());
-    dispView->setStyleSheet(tr("border: 0px solid black"));
-    dispView->setScene(dispScene);
-    dispView->setPalette(pal);
-    dispScene->setBackgroundBrush(QBrush(Qt::black));
+    params.dotSize = readLine(i_dotSize);
 
-    d_seg = new dynSegment(readLine(i_dotSize));
-    s_seg = new statSegment(readLine(i_dotSize));
+    d_seg = new dynSegment(params);
+    s_seg = new statSegment(params);
 
     connect(ui->i_dotSize, &QLineEdit::editingFinished, this, [&](){
-       d_seg->setDotSize(readLine(i_dotSize));
-       s_seg->setDotSize(readLine(i_dotSize));
+       d_seg->setDotSize();
+       s_seg->setDotSize();
     });
 
     for (auto &&screen: QGuiApplication::screens()){
@@ -67,24 +53,14 @@ MainWindow::MainWindow(QWidget *parent) :
             return;
         }
 
-        bool temp_useGaze = ui->i_gazePoint->isChecked();
+        fillParams();
+
         int temp_taskNum = ui->i_numDynamicTask->value();
 
-        QRect &&screenres = ui->i_screenBox->currentData().toRect();
+        if(ui->i_write_log->isChecked()) params.GazePt->startLog(ui->i_log_folder->text(), ui->i_participant->text());
 
-        secondDisplay->move(QPoint(screenres.x(), screenres.y()));
-        secondDisplay->resize(screenres.width(), screenres.height());
-
-        dispWidth = screenres.width();
-        dispHeight = screenres.height();
-        dispCenter = QPoint(screenres.center());
-        dispScene->setSceneRect(0,0,dispWidth, dispHeight);
-
-        if(ui->i_write_log->isChecked()) GazePt->startLog(ui->i_log_folder->text(), ui->i_participant->text());
-        GazePt->setPerimeter((100.0 / dispWidth), (100.0 / dispHeight), temp_useGaze);
-
-        secondDisplay->showFullScreen();
-        secondDisplay->setCursor(Qt::BlankCursor);
+        params.display->showFullScreen();
+        params.display->setCursor(Qt::BlankCursor);
 
         resetRandom();
         s_seg->runStaticSegment();
@@ -98,13 +74,13 @@ MainWindow::MainWindow(QWidget *parent) :
         resetRandom();
         s_seg->runStaticSegment();
 
-        secondDisplay->close();
+        params.display->close();
 
-        if(ui->i_write_log->isChecked()) GazePt->stopLog();
+        if(ui->i_write_log->isChecked()) params.GazePt->stopLog();
     });
 
     connect(ui->b_izlaz, &QPushButton::clicked, this, [&](){
-        secondDisplay->close();
+        params.display->close();
         this->close();
     });
 
@@ -120,16 +96,41 @@ MainWindow::MainWindow(QWidget *parent) :
                                                         | QFileDialog::DontResolveSymlinks));
     });
 
-    GazePt->Start();
+    params.GazePt->Start();
 }
 
 MainWindow::~MainWindow()
 {
-    GazePt->Stop();
-
-    delete GazePt;
-    delete secondDisplay;
+    params.GazePt->Stop();
 
     delete ui;
+}
+
+void MainWindow::fillParams()
+{
+    QRect &&screenres = ui->i_screenBox->currentData().toRect();
+
+    params.useGaze = ui->i_gazePoint->isChecked();
+    params.dispWidth = screenres.width();
+    params.dispHeight = screenres.height();
+    params.dispCenter = QPoint(screenres.center());
+    params.dispScene->setSceneRect(0,0, params.dispWidth, params.dispHeight);
+    params.display->move(QPoint(screenres.x(), screenres.y()));
+    params.display->resize(params.dispWidth, params.dispHeight);
+
+    params.dotOffset = readLine(i_dotOctaOffset);
+
+    params.timeDot = readLine(i_timeStaticDot);
+    params.timeSegment = readLine(i_timeStaticSegment);
+
+
+    params.timeCenter = readLine(i_timeDynamicCenter);
+    params.timeTarget = readLine(i_timeDynamicOctagon);
+    params.timeMovement = readLine(i_timeDynamicMovement);
+    params.timeAnswer = readLine(i_timeDynamicUserInput);
+
+    params.GazePt->setPerimeter((params.dotPerimeter / params.dispWidth), (params.dotPerimeter / params.dispHeight), params.useGaze);
+
+
 }
 

@@ -17,15 +17,15 @@ private:
 
     int targetNum;
 
-    segParams* params;
+    const segParams &params;
 
     QPair<double, double> generateNewCords();
 public:
-    statSegment(int dotSize);
+    statSegment(const segParams &parameters);
     ~statSegment();
 
     void runStaticSegment();
-    void setDotSize(int size);
+    void setDotSize();
 };
 
 #endif // STATSEGMENT_H

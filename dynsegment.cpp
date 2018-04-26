@@ -3,16 +3,15 @@
 #define m_dist(a,b) (sqrt((a.x() - b.x())*(a.x() - b.x()) + (a.y() - b.y())*(a.y() - b.y())))
 #define m_angle(a,b) (atan2(a.y() - b.y(), a.x() - b.x()))
 
-dynSegment::dynSegment(int dotSize)
+dynSegment::dynSegment(const segParams &parameters) :
+    params(parameters)
 {
     runTimer.setTimerType(Qt::PreciseTimer);
     cyclicTimer.setTimerType(Qt::PreciseTimer);
 
-    params->dotSize = dotSize;
-
-    center_dot = new QDot(0, 0, dotSize, QBrush(Qt::white));
+    center_dot = new QDot(0, 0, params.dotSize, QBrush(Qt::white));
     for (int k = 0; k < 15; k++){
-        dynDot.append(new QDot(0, 0, dotSize, QBrush(Qt::white)));
+        dynDot.append(new QDot(0, 0, params.dotSize, QBrush(Qt::white)));
     }
 }
 
@@ -28,14 +27,14 @@ void dynSegment::runDynamicSegment(int lvl, int taskNum, int numDot)
 
     for(int k = 1; k <= taskNum; k++){
 
-        params->GazePt->logCustomEvent("DYN_START", lvl + k/10.0, 0, 0);
-        params->GazePt->setTarget(0, 0.5, 0.5);
+        params.GazePt->logCustomEvent("DYN_START", lvl + k/10.0, 0, 0);
+        params.GazePt->setTarget(0, 0.5, 0.5);
 
         // part 1
-        center_dot->setCord(params->dispWidth/2, params->dispHeight/2);
-        params->dispScene->addItem(center_dot);
-        runTimer.singleShot(params->timeCenter * 1000, Qt::PreciseTimer, this, [&](){
-            params->dispScene->removeItem(center_dot);
+        center_dot->setCord(params.dispWidth/2, params.dispHeight/2);
+        params.dispScene->addItem(center_dot);
+        runTimer.singleShot(params.timeCenter * 1000, Qt::PreciseTimer, this, [&](){
+            params.dispScene->removeItem(center_dot);
             tempLoop.quit();
         });
         tempLoop.exec();
@@ -43,13 +42,13 @@ void dynSegment::runDynamicSegment(int lvl, int taskNum, int numDot)
         // part 2
         setColor(lvl, numDot);
         for(int k=0; k<numDot; k++){
-            dynDot[k]->setCord(params->dispWidth/2 + cos(k*pi*2/numDot) * params->dotOffset,
-                                params->dispHeight/2 + sin(k*pi*2/numDot) * params->dotOffset);
+            dynDot[k]->setCord(params.dispWidth/2 + cos(k*pi*2/numDot) * params.dotOffset,
+                                params.dispHeight/2 + sin(k*pi*2/numDot) * params.dotOffset);
             dynDot[k]->setSpeed(generator_uniform()/2 + 0.5);
             dynDot[k]->setAngle(generator_normal()/2  + k*pi*2/numDot);
-            params->dispScene->addItem(dynDot[k]);
+            params.dispScene->addItem(dynDot[k]);
         }
-        runTimer.singleShot(params->timeTarget, Qt::PreciseTimer, this, [&](){
+        runTimer.singleShot(params.timeTarget * 1000, Qt::PreciseTimer, this, [&](){
             setColor(0);
             tempLoop.quit();
         });
@@ -64,7 +63,7 @@ void dynSegment::runDynamicSegment(int lvl, int taskNum, int numDot)
         });
 
         cyclicTimer.start(1000/60);
-        runTimer.singleShot(params->timeMovement, Qt::PreciseTimer, this, [&](){
+        runTimer.singleShot(params.timeMovement * 1000, Qt::PreciseTimer, this, [&](){
             cyclicTimer.disconnect();
             cyclicTimer.stop();
             tempLoop.quit();
@@ -74,32 +73,31 @@ void dynSegment::runDynamicSegment(int lvl, int taskNum, int numDot)
         // part 4
         int resF = 0;
         int resT = 0;
-        runTimer.singleShot(params->timeAnswer, Qt::PreciseTimer, this, [&](){
+        runTimer.singleShot(params.timeAnswer * 1000, Qt::PreciseTimer, this, [&](){
             for(auto &&dot: dynDot){
                 int temp = dot->getResult();
                 (temp == 1 ? resT : resF) += temp;
                 dot->acceptMouse = false;
-                params->dispScene->removeItem(dot);
+                params.dispScene->removeItem(dot);
             }
-            params->display->setCursor(Qt::BlankCursor);
+            params.display->setCursor(Qt::BlankCursor);
             tempLoop.quit();
         });
 
         for(auto &&dot: dynDot) dot->acceptMouse = true;
         QCursor tempCursor = QCursor(Qt::ArrowCursor);
-        tempCursor.setPos(params->dispCenter);
-        params->display->setCursor(tempCursor);
+        tempCursor.setPos(params.dispCenter);
+        params.display->setCursor(tempCursor);
 
         tempLoop.exec();
-        params->GazePt->logCustomEvent("DYN_END", lvl + k/10.0, resT, -resF);
+        params.GazePt->logCustomEvent("DYN_END", lvl + k/10.0, resT, -resF);
     }
 }
 
-void dynSegment::setDotSize(int size)
+void dynSegment::setDotSize()
 {
-    params->dotSize = size;
-    center_dot->setSize(size);
-    for(auto &&dot: dynDot) dot->setSize(size);
+    center_dot->setSize(params.dotSize);
+    for(auto &&dot: dynDot) dot->setSize(params.dotSize);
 }
 
 void dynSegment::setColor(int lvl, int numDot)
@@ -141,21 +139,21 @@ void dynSegment::collisionCheck(int numDot)
             QPointF center = dynDot[k]->rect().center();
             double angle =  dynDot[k]->getAngle();
 
-            if (center.x() <= params->dispPadding)
-                dynDot[k]->moveDot(pi-2*angle, (params->dispPadding - center.x()) / cos(pi - angle));
-            if (center.x() >= params->dispWidth - params->dispPadding)
-                dynDot[k]->moveDot(pi-2*angle, (center.x() - (params->dispWidth - params->dispPadding)) / cos(angle));
-            if (center.y() <= params->dispPadding)
-                dynDot[k]->moveDot(-2*angle, (params->dispPadding - center.y()) / sin(-angle));
-            if (center.y() >= params->dispHeight - params->dispPadding)
-                dynDot[k]->moveDot(-2*angle, (center.y() - (params->dispHeight - params->dispPadding)) / sin(angle));
+            if (center.x() <= params.dispPadding)
+                dynDot[k]->moveDot(pi-2*angle, (params.dispPadding - center.x()) / cos(pi - angle));
+            if (center.x() >= params.dispWidth - params.dispPadding)
+                dynDot[k]->moveDot(pi-2*angle, (center.x() - (params.dispWidth - params.dispPadding)) / cos(angle));
+            if (center.y() <= params.dispPadding)
+                dynDot[k]->moveDot(-2*angle, (params.dispPadding - center.y()) / sin(-angle));
+            if (center.y() >= params.dispHeight - params.dispPadding)
+                dynDot[k]->moveDot(-2*angle, (center.y() - (params.dispHeight - params.dispPadding)) / sin(angle));
         }
         for (int k = 0; k<numDot ; k++){
             for (int i = k + 1; i<numDot ; i++){
                 if(dynDot[k]->collidesWithItem(dynDot[i])){
                     QPointF center1 = dynDot[k]->rect().center();
                     QPointF center2 = dynDot[i]->rect().center();
-                    double dist = (params->dotSize - m_dist(center1, center2))/2;
+                    double dist = (params.dotSize - m_dist(center1, center2))/2;
                     double angle = m_angle(center1, center2);
                     double tempAngle = dynDot[k]->getAngle();
                     double tempSpeed = dynDot[k]->getSpeed();

@@ -17,19 +17,17 @@ private:
     QDot* center_dot;
     QList<QDot*> dynDot;
 
-    segParams* params;
+    const segParams &params;
 
     void setColor(int lvl, int numDot = 0);
     void collisionCheck(int numDot);
 
 public:
-    dynSegment(int dotSize);
+    dynSegment(const segParams &parameters);
     ~dynSegment();
 
-    void setParams();
-
     void runDynamicSegment(int lvl, int taskNum, int numDot);
-    void setDotSize(int size);
+    void setDotSize();
 };
 
 #endif // DYNSEGMENT_H

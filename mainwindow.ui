@@ -103,7 +103,7 @@
    <widget class="QLineEdit" name="i_dotSize">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>240</x>
       <y>60</y>
       <width>41</width>
       <height>20</height>
@@ -199,7 +199,7 @@
      <rect>
       <x>240</x>
       <y>90</y>
-      <width>61</width>
+      <width>41</width>
       <height>20</height>
      </rect>
     </property>
@@ -212,7 +212,7 @@
      <rect>
       <x>240</x>
       <y>120</y>
-      <width>61</width>
+      <width>41</width>
       <height>20</height>
      </rect>
     </property>
@@ -225,12 +225,12 @@
      <rect>
       <x>240</x>
       <y>220</y>
-      <width>61</width>
+      <width>41</width>
       <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>2000</string>
+     <string>2</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="i_timeDynamicOctagon">
@@ -238,12 +238,12 @@
      <rect>
       <x>240</x>
       <y>250</y>
-      <width>61</width>
+      <width>41</width>
       <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>3000</string>
+     <string>3</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="i_timeDynamicMovement">
@@ -251,12 +251,12 @@
      <rect>
       <x>240</x>
       <y>280</y>
-      <width>61</width>
+      <width>41</width>
       <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>3000</string>
+     <string>5</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="i_timeDynamicUserInput">
@@ -264,18 +264,18 @@
      <rect>
       <x>240</x>
       <y>310</y>
-      <width>61</width>
+      <width>41</width>
       <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>7000</string>
+     <string>5</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_9">
     <property name="geometry">
      <rect>
-      <x>200</x>
+      <x>290</x>
       <y>60</y>
       <width>21</width>
       <height>16</height>
@@ -288,7 +288,7 @@
    <widget class="QLabel" name="label_10">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>290</x>
       <y>90</y>
       <width>21</width>
       <height>16</height>
@@ -301,7 +301,7 @@
    <widget class="QLabel" name="label_11">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>290</x>
       <y>120</y>
       <width>21</width>
       <height>16</height>
@@ -316,7 +316,7 @@
      <rect>
       <x>240</x>
       <y>150</y>
-      <width>61</width>
+      <width>41</width>
       <height>20</height>
      </rect>
     </property>
@@ -405,7 +405,7 @@
    <widget class="QLabel" name="label_12">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>290</x>
       <y>150</y>
       <width>21</width>
       <height>16</height>
@@ -418,53 +418,53 @@
    <widget class="QLabel" name="label_13">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>290</x>
       <y>220</y>
       <width>21</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>[ms]</string>
+     <string>[s]</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_14">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>290</x>
       <y>250</y>
       <width>21</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>[ms]</string>
+     <string>[s]</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_15">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>290</x>
       <y>280</y>
       <width>21</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>[ms]</string>
+     <string>[s]</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_16">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>290</x>
       <y>310</y>
       <width>21</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>[ms]</string>
+     <string>[s]</string>
     </property>
    </widget>
    <widget class="Line" name="line_4">

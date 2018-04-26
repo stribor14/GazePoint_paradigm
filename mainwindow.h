@@ -6,20 +6,10 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QScreen>
 
-#include "gazecomunicator.h"
 #include "dynsegment.h"
 #include "statsegment.h"
-
-#include <QGraphicsView>
-#include <QGraphicsScene>
-#include <QGuiApplication>
-#include <QScreen>
-#include <QPalette>
-#include <QTimer>
-#include <QPair>
-#include <QEventLoop>
-#include <QOpenGLWidget>
 
 namespace Ui {
 class MainWindow;
@@ -35,24 +25,13 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    QWidget *secondDisplay;
-    QGraphicsView *dispView;
-    QGraphicsScene *dispScene;
 
-    GazeComunicator* GazePt;
-
-
-
-    int maxDist = 25;
-    int targetNum;
-
-    int dispWidth;
-    int dispHeight;
-    QPoint dispCenter;
-    double dispPadding = 150;
+    segParams params;
 
     dynSegment* d_seg;
     statSegment* s_seg;
+
+    void fillParams();
 
 };
 
