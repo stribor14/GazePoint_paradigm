@@ -24,6 +24,11 @@ public:
     ~MainWindow() override;
 
 private:
+    enum paramSetting{
+        Test,
+        Recording
+    };
+
     Ui::MainWindow *ui;
 
     segParams params;
@@ -31,7 +36,7 @@ private:
     dynSegment* d_seg;
     statSegment* s_seg;
 
-    void fillParams();
+    void fillParams(paramSetting setting);
 
 };
 

@@ -28,21 +28,16 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     connect(ui->b_test, &QPushButton::clicked, this, [&](){
-      /*  QRect &&screenres = ui->i_screenBox->currentData().toRect();
-        secondDisplay->move(QPoint(screenres.x(), screenres.y()));
-        secondDisplay->resize(screenres.width(), screenres.height());
+        fillParams(Test);
 
-        dispWidth = screenres.width();
-        dispHeight = screenres.height();
-        red_dot->setCord(dispWidth/2, dispHeight/2);
-        dispScene->addItem(red_dot);
+        params.display->showFullScreen();
+        params.display->setCursor(Qt::BlankCursor);
 
-        secondDisplay->showFullScreen();
+        resetRandom();
+        s_seg->runStaticSegment();
+        d_seg->runDynamicSegment(1, 1, 8);
 
-        QTimer::singleShot(3000,[&](){
-            secondDisplay->close();
-            dispScene->removeItem(red_dot);
-        });*/
+        params.display->close();
     });
 
     connect(ui->b_pokreni, &QPushButton::clicked, this, [&](){
@@ -53,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
             return;
         }
 
-        fillParams();
+        fillParams(Recording);
 
         int temp_taskNum = ui->i_numDynamicTask->value();
 
@@ -106,31 +101,57 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::fillParams()
+void MainWindow::fillParams(paramSetting setting)
 {
-    QRect &&screenres = ui->i_screenBox->currentData().toRect();
+    if (setting == Recording){
+        QRect &&screenres = ui->i_screenBox->currentData().toRect();
 
-    params.useGaze = ui->i_gazePoint->isChecked();
-    params.dispWidth = screenres.width();
-    params.dispHeight = screenres.height();
-    params.dispCenter = QPoint(screenres.center());
-    params.dispScene->setSceneRect(0,0, params.dispWidth, params.dispHeight);
-    params.display->move(QPoint(screenres.x(), screenres.y()));
-    params.display->resize(params.dispWidth, params.dispHeight);
+        params.useGaze = ui->i_gazePoint->isChecked();
+        params.dispWidth = screenres.width();
+        params.dispHeight = screenres.height();
+        params.dispCenter = QPoint(screenres.center());
+        params.dispScene->setSceneRect(0,0, params.dispWidth, params.dispHeight);
+        params.display->move(QPoint(screenres.x(), screenres.y()));
+        params.display->resize(params.dispWidth, params.dispHeight);
 
-    params.dotOffset = readLine(i_dotOctaOffset);
+        params.dotOffset = readLine(i_dotOctaOffset);
 
-    params.timeDot = readLine(i_timeStaticDot);
-    params.timeSegment = readLine(i_timeStaticSegment);
+        params.timeDot = readLine(i_timeStaticDot);
+        params.timeSegment = readLine(i_timeStaticSegment);
 
 
-    params.timeCenter = readLine(i_timeDynamicCenter);
-    params.timeTarget = readLine(i_timeDynamicOctagon);
-    params.timeMovement = readLine(i_timeDynamicMovement);
-    params.timeAnswer = readLine(i_timeDynamicUserInput);
+        params.timeCenter = readLine(i_timeDynamicCenter);
+        params.timeTarget = readLine(i_timeDynamicOctagon);
+        params.timeMovement = readLine(i_timeDynamicMovement);
+        params.timeAnswer = readLine(i_timeDynamicUserInput);
 
-    params.GazePt->setPerimeter((params.dotPerimeter / params.dispWidth), (params.dotPerimeter / params.dispHeight), params.useGaze);
+        params.GazePt->setPerimeter((params.dotPerimeter / params.dispWidth), (params.dotPerimeter / params.dispHeight), params.useGaze);
+    }
 
+    if (setting == Test){
+        QRect &&screenres = ui->i_screenBox->currentData().toRect();
+
+        params.useGaze = ui->i_gazePoint->isChecked();
+        params.dispWidth = screenres.width();
+        params.dispHeight = screenres.height();
+        params.dispCenter = QPoint(screenres.center());
+        params.dispScene->setSceneRect(0,0, params.dispWidth, params.dispHeight);
+        params.display->move(QPoint(screenres.x(), screenres.y()));
+        params.display->resize(params.dispWidth, params.dispHeight);
+
+        params.dotOffset = readLine(i_dotOctaOffset);
+
+        params.timeDot =  readLine(i_timeStaticDot);
+        params.timeSegment = 10;
+
+
+        params.timeCenter = 2;
+        params.timeTarget = 5;
+        params.timeMovement = 5;
+        params.timeAnswer = 10;
+
+        params.GazePt->setPerimeter((params.dotPerimeter / params.dispWidth), (params.dotPerimeter / params.dispHeight), params.useGaze);
+    }
 
 }
 
