@@ -48,6 +48,6 @@ HEADERS += \
 FORMS += \
         mainwindow.ui
 
-INCLUDEPATH += C:\PROGRA~2\2017\Community\VC\Tools\MSVC\14.13.26128\atlmfc\include
+# INCLUDEPATH += C:\PROGRA~2\2017\Community\VC\Tools\MSVC\14.13.26128\atlmfc\include
 
 DEFINES += _AFXDLL
