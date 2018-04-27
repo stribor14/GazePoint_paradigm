@@ -312,6 +312,9 @@
     </property>
    </widget>
    <widget class="QLineEdit" name="i_timeStaticDot">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>240</x>
@@ -361,6 +364,12 @@
     </property>
     <property name="text">
      <string>GazePoint</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+    <property name="tristate">
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="Line" name="line_2">
@@ -505,6 +514,9 @@
     <property name="text">
      <string>Logiranje</string>
     </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
    </widget>
    <widget class="QPushButton" name="b_log_folder">
     <property name="geometry">
@@ -529,7 +541,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>C:/</string>
+     <string/>
     </property>
    </widget>
    <widget class="QLabel" name="label_20">

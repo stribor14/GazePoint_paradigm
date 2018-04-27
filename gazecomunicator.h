@@ -46,6 +46,8 @@ public:
     void setPerimeter(const double &perimeterX, const double &perimeterY, const bool &needUnlock = false);
     void setTarget(const int &num, const double &x, const double &y);
 
+    bool isRunning(){ return !stopThread; }
+
 private slots:
     void MsgLoop();
 

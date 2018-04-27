@@ -10,20 +10,20 @@ dynSegment::dynSegment(const segParams &parameters) :
     cyclicTimer.setTimerType(Qt::PreciseTimer);
 
     center_dot = new QDot(0, 0, params.dotSize, QBrush(Qt::white));
-    for (int k = 0; k < 15; k++){
-        dynDot.append(new QDot(0, 0, params.dotSize, QBrush(Qt::white)));
-    }
 }
 
 dynSegment::~dynSegment()
 {
     delete center_dot;
-
 }
 
 void dynSegment::runDynamicSegment(int lvl, int taskNum, int numDot)
 {
     QEventLoop tempLoop;
+
+    for (int k = 0; k < numDot; k++){
+        dynDot.append(new QDot(0, 0, params.dotSize, QBrush(Qt::white)));
+    }
 
     for(int k = 1; k <= taskNum; k++){
 
@@ -40,8 +40,8 @@ void dynSegment::runDynamicSegment(int lvl, int taskNum, int numDot)
         tempLoop.exec();
 
         // part 2
-        setColor(lvl, numDot);
-        for(int k=0; k<numDot; k++){
+        setColor(lvl);
+        for(int k = 0; k < numDot; k++){
             dynDot[k]->setCord(params.dispWidth/2 + cos(k*pi*2/numDot) * params.dotOffset,
                                 params.dispHeight/2 + sin(k*pi*2/numDot) * params.dotOffset);
             dynDot[k]->setSpeed(generator_uniform()/2 + 0.5);
@@ -56,10 +56,10 @@ void dynSegment::runDynamicSegment(int lvl, int taskNum, int numDot)
 
         // part 3
         connect(&cyclicTimer, &QTimer::timeout, this, [&](){
-            for(int k = 0; k < numDot; k++)
+            for(auto &&dot: dynDot)
                 //dot->moveDot(generator_uniform()*2*pi,generator_uniform() * maxDist);
-                dynDot[k]->moveDot(20);
-            collisionCheck(numDot);
+                dot->moveDot(20);
+            collisionCheck();
         });
 
         cyclicTimer.start(1000/60);
@@ -92,16 +92,19 @@ void dynSegment::runDynamicSegment(int lvl, int taskNum, int numDot)
         tempLoop.exec();
         params.GazePt->logCustomEvent("DYN_END", lvl + k/10.0, resT, -resF);
     }
+
+    dynDot.clear();
 }
 
-void dynSegment::setDotSize()
+void dynSegment::updateDotSize()
 {
     center_dot->setSize(params.dotSize);
     for(auto &&dot: dynDot) dot->setSize(params.dotSize);
 }
 
-void dynSegment::setColor(int lvl, int numDot)
+void dynSegment::setColor(int lvl)
 {
+    int numDot = dynDot.size();
     QList<int> greenIndex;
     for(auto &&dot: dynDot) dot->setBrush(QBrush(Qt::white));
     if(lvl){
@@ -132,24 +135,24 @@ void dynSegment::setColor(int lvl, int numDot)
     }
 }
 
-void dynSegment::collisionCheck(int numDot)
+void dynSegment::collisionCheck()
 {
     {
-        for(int k = 0 ; k < numDot; k++){
-            QPointF center = dynDot[k]->rect().center();
-            double angle =  dynDot[k]->getAngle();
+        for(auto &&dot : dynDot){
+            QPointF center = dot->rect().center();
+            double angle =  dot->getAngle();
 
             if (center.x() <= params.dispPadding)
-                dynDot[k]->moveDot(pi-2*angle, (params.dispPadding - center.x()) / cos(pi - angle));
+                dot->moveDot(pi-2*angle, (params.dispPadding - center.x()) / cos(pi - angle));
             if (center.x() >= params.dispWidth - params.dispPadding)
-                dynDot[k]->moveDot(pi-2*angle, (center.x() - (params.dispWidth - params.dispPadding)) / cos(angle));
+                dot->moveDot(pi-2*angle, (center.x() - (params.dispWidth - params.dispPadding)) / cos(angle));
             if (center.y() <= params.dispPadding)
-                dynDot[k]->moveDot(-2*angle, (params.dispPadding - center.y()) / sin(-angle));
+                dot->moveDot(-2*angle, (params.dispPadding - center.y()) / sin(-angle));
             if (center.y() >= params.dispHeight - params.dispPadding)
-                dynDot[k]->moveDot(-2*angle, (center.y() - (params.dispHeight - params.dispPadding)) / sin(angle));
+                dot->moveDot(-2*angle, (center.y() - (params.dispHeight - params.dispPadding)) / sin(angle));
         }
-        for (int k = 0; k<numDot ; k++){
-            for (int i = k + 1; i<numDot ; i++){
+        for (int k = 0; k < dynDot.size() ; k++){
+            for (int i = k + 1; i < dynDot.size() ; i++){
                 if(dynDot[k]->collidesWithItem(dynDot[i])){
                     QPointF center1 = dynDot[k]->rect().center();
                     QPointF center2 = dynDot[i]->rect().center();

@@ -19,15 +19,15 @@ private:
 
     const segParams &params;
 
-    void setColor(int lvl, int numDot = 0);
-    void collisionCheck(int numDot);
+    void setColor(int lvl);
+    void collisionCheck();
 
 public:
     dynSegment(const segParams &parameters);
     ~dynSegment();
 
     void runDynamicSegment(int lvl, int taskNum, int numDot);
-    void setDotSize();
+    void updateDotSize();
 };
 
 #endif // DYNSEGMENT_H

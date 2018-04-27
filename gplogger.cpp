@@ -63,7 +63,7 @@ GPDataParser::GPDataParser()
 QMap<QByteArray, double> GPDataParser::parseData(const QByteArray &data)
 {
     QMap<QByteArray, double> temp;
-    if(data.mid(1,3)  == "REC"){
+    if(qstrcmp(data.mid(1,3),"REC")){
         temp["valid"] = 0;
     }
     else {
