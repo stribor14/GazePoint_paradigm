@@ -10,17 +10,20 @@ class QGPClient : public QObject
     Q_OBJECT
 private:
     QTcpSocket *tcpSocket;
-    QMutex dataMutex;
+
     unsigned int ipPort;
     QString ipAddress;
+
+    QList<QByteArray> buffer;
     int bufferSize;
-    QList<QByteArray> dataBuffer;
+    QMutex bufferMutex;
 
 private slots:
-    void readData();
+    void receiveData();
 
 public:
     QGPClient(QObject * parent = NULL);
+    ~QGPClient();
 
     void setAddress (QString address) {ipAddress = address;} // set server IP address
     void setPort (unsigned int port) {ipPort = port;} // set server IP port
@@ -29,9 +32,19 @@ public:
     bool clientDisconnect();
 
     void sendCmd(QByteArray cmd);
-    void getData(QList<QByteArray> &data);
 
-    int getState(){return tcpSocket->state();}
+    void getMsgBuffer(QList<QByteArray> &data);
+    QByteArray getLastMsg(); // WARNING: clearing the buffer content
+
+    QTcpSocket::SocketState getState(){return tcpSocket->state();}
+    QTcpSocket::SocketError getLastError(){return tcpSocket->error();}
+
+signals: // forwarded from QTcpSocket
+    void hostFound();
+    void connected();
+    void disconnected();
+    void stateChanged(QTcpSocket::SocketState);
+    void error(QTcpSocket::SocketError);
 };
 
 #endif // QGPCLIENT_H

@@ -1,21 +1,20 @@
 #include "qgpclient.h"
 
-void QGPClient::readData()
+#include <QtGlobal>
+
+void QGPClient::receiveData()
 {
-    int delimiter_index;
     QByteArray data = tcpSocket->readAll();
-    delimiter_index = data.indexOf("\r\n", 0);
+    int delimiter_index = data.indexOf("\r\n", 0);
     while (data.size())
     {
-        QByteArray tmp = data.mid(0, delimiter_index);
-
-        dataMutex.lock();
-            dataBuffer.append(tmp);
-            while (dataBuffer.size() > bufferSize)
+        bufferMutex.lock();
+            buffer.append(data.mid(0, delimiter_index));
+            while (buffer.size() > bufferSize)
             {
-                dataBuffer.removeFirst();
+                buffer.removeFirst();
             }
-        dataMutex.unlock();
+        bufferMutex.unlock();
 
         data.remove(0, delimiter_index+2);
         delimiter_index = data.indexOf("\r\n", 0);
@@ -29,14 +28,27 @@ QGPClient::QGPClient(QObject * parent) : QObject(parent),
     ipAddress = "127.0.0.1";
 
     bufferSize = 60*60*3;
-    connect(tcpSocket, &QTcpSocket::readyRead, this, &QGPClient::readData);
+    connect(tcpSocket, &QTcpSocket::readyRead, this, &QGPClient::receiveData);
+
+    //signal forwarding
+    connect(tcpSocket, &QTcpSocket::hostFound, this, &QGPClient::hostFound);
+    connect(tcpSocket, &QTcpSocket::connected, this, &QGPClient::connected);
+    connect(tcpSocket, &QTcpSocket::disconnected, this, &QGPClient::disconnected);
+    connect(tcpSocket, &QTcpSocket::stateChanged, this, &QGPClient::stateChanged);
+    connect(tcpSocket, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &QGPClient::error);
+}
+
+QGPClient::~QGPClient()
+{
+    tcpSocket->abort();
+    delete tcpSocket;
 }
 
 bool QGPClient::clientConnect()
 {
     tcpSocket->connectToHost(ipAddress, ipPort);
-    if (!tcpSocket->waitForConnected(1000)) return false;
-    return true;
+    if (tcpSocket->waitForConnected(1000)) return true;
+    return false;
 }
 
 bool QGPClient::clientDisconnect()
@@ -48,12 +60,27 @@ bool QGPClient::clientDisconnect()
     return false;
 }
 
-void QGPClient::getData(QList<QByteArray> &data)
+void QGPClient::getMsgBuffer(QList<QByteArray> &data)
 {
-    dataMutex.lock();
+    bufferMutex.lock();
         data.clear();
-        dataBuffer.swap(data);
-    dataMutex.unlock();
+        buffer.swap(data);
+    bufferMutex.unlock();
+}
+
+QByteArray QGPClient::getLastMsg()
+{
+    QByteArray temp;
+
+    bufferMutex.lock();
+        if (buffer.isEmpty()) return temp;
+        else {
+            temp = buffer.takeLast();
+        }
+        buffer.clear();
+    bufferMutex.unlock();
+
+    return temp;
 }
 
 void QGPClient::sendCmd(QByteArray cmd)

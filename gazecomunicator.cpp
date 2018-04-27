@@ -73,7 +73,7 @@ void GazeComunicator::MsgLoop()
 {
     QList<QByteArray> buffer;
     while(!stopThread){
-        GP->getData(buffer);
+        GP->getMsgBuffer(buffer);
         for(auto &&data: buffer){
             if(data.at(0) != '<') break; // if data doesnt start with '<'
             QMap<QByteArray, double>  temp = parser->parseData(data);
