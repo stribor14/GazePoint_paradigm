@@ -8,8 +8,9 @@
 #include <QEventLoop>
 
 #include <utility>
+#include <string>
 
-#include "GPClient.h"
+#include "QGPClient.h"
 #include "gplogger.h"
 
 class GazeComunicator : public QObject
@@ -27,7 +28,7 @@ private:
     bool targetPending = false;
     bool customEventPending = false;
 
-    GPClient* GP;
+    QGPClient* GP;
     GPLogger* logger;
     GPDataParser* parser;
     QThread thread;
@@ -41,7 +42,7 @@ public:
     void startLog(const QString &folder, const QString &name);
     void stopLog();
 
-    void logCustomEvent(const string &eventDescriptor, double eventNumber, double data1, double data2, double data3 = 0, double data4 = 0);
+    void logCustomEvent(const std::string &eventDescriptor, double eventNumber, double data1, double data2, double data3 = 0, double data4 = 0);
     void setPerimeter(const double &perimeterX, const double &perimeterY, const bool &needUnlock = false);
     void setTarget(const int &num, const double &x, const double &y);
 

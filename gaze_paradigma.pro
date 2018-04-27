@@ -29,7 +29,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-        GPClient.cpp \
     gazecomunicator.cpp \
     qdot.cpp \
     gplogger.cpp \
@@ -39,7 +38,6 @@ SOURCES += \
 
 HEADERS += \
         mainwindow.h \
-        GPClient.h \
     gazecomunicator.h \
     qdot.h \
     gplogger.h \

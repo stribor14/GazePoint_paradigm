@@ -16,7 +16,7 @@ public:
     GPLogger() = default;
     void startLog(const QString &folder, const QString &name);
     void stopLog();
-    void logGaze(const std::map<std::string, double> &data);
+    void logGaze(const QMap<QByteArray, double> &data);
     void logEvent(const std::string &eventDescriptor, double eventNumber, double data1, double data2, double data3 = 0, double data4 = 0);
 
 private:
@@ -31,7 +31,7 @@ class GPDataParser
 {
 public:
     GPDataParser();
-    std::map<std::string, double> parseData(const std::string &data);
+    QMap<QByteArray, double> parseData(const QByteArray &data);
 
 };
 #endif // GPLOGGER_H

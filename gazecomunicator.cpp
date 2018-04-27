@@ -2,7 +2,7 @@
 
 GazeComunicator::GazeComunicator(QObject * parent) : QObject(parent)
 {
-    GP = new GPClient();
+    GP = new QGPClient();
     logger = new GPLogger();
     parser = new GPDataParser();
     moveToThread(&thread);
@@ -18,16 +18,13 @@ GazeComunicator::~GazeComunicator()
 
 void GazeComunicator::Start()
 {
-    GP->client_connect();
-    while(!GP->is_connected());
-    GP->send_cmd(R"(<SET ID="ENABLE_SEND_TIME" STATE="1" />)");
-    GP->send_cmd(R"(<SET ID="ENABLE_SEND_COUNTER" STATE="1" />)");
-    GP->send_cmd(R"(<SET ID="ENABLE_SEND_POG_FIX" STATE="1" />)");
-    GP->send_cmd(R"(<SET ID="ENABLE_SEND_POG_BEST" STATE="1" />)");
+    if(!GP->clientConnect()) return;
+    GP->sendCmd(R"(<SET ID="ENABLE_SEND_TIME" STATE="1" />)");
+    GP->sendCmd(R"(<SET ID="ENABLE_SEND_COUNTER" STATE="1" />)");
+    GP->sendCmd(R"(<SET ID="ENABLE_SEND_POG_FIX" STATE="1" />)");
+    GP->sendCmd(R"(<SET ID="ENABLE_SEND_POG_BEST" STATE="1" />)");
 
-    // zjenica?
-
-    GP->send_cmd(R"(<SET ID="ENABLE_SEND_DATA" STATE="1" />)");
+    GP->sendCmd(R"(<SET ID="ENABLE_SEND_DATA" STATE="1" />)");
 
     stopThread = false;
     thread.start();
@@ -35,8 +32,7 @@ void GazeComunicator::Start()
 
 void GazeComunicator::Stop()
 {
-    GP->client_disconnect();
-    while(GP->is_connected());
+    GP->clientDisconnect();
 
     stopThread = true;
     thread.wait();      // if you want synchronous stop
@@ -75,12 +71,12 @@ void GazeComunicator::setTarget(const int &num, const double &x, const double &y
 
 void GazeComunicator::MsgLoop()
 {
-    deque<string> buffer;
+    QList<QByteArray> buffer;
     while(!stopThread){
-        GP->get_rx(buffer);
+        GP->getData(buffer);
         for(auto &&data: buffer){
             if(data.at(0) != '<') break; // if data doesnt start with '<'
-            std::map<std::string, double> temp = parser->parseData(data);
+            QMap<QByteArray, double>  temp = parser->parseData(data);
             if(temp["valid"] == 0) continue;
             logger->logGaze(temp);
             if(targetPending){

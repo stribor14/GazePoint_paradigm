@@ -30,7 +30,7 @@ void QGPClient::readData()
 }
 
 QGPClient::QGPClient(QObject * parent) : QObject(parent),
-    tcpSocket(new QTcpSocket(this)),
+    tcpSocket(new QTcpSocket()),
     thread(new QThread(this))
 {
     _ip_port = 4242;

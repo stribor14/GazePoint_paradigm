@@ -1,6 +1,6 @@
 #include "gplogger.h"
 
-QList<std::string> keys;
+QList<QByteArray> keys;
 
 void GPLogger::startLog(const QString &folder, const QString &name)
 {
@@ -9,7 +9,7 @@ void GPLogger::startLog(const QString &folder, const QString &name)
     eventFile.open((temp + "_EVENT.csv").toStdString(), std::ofstream::out | std::ofstream::app);
 
     for(auto &&key: keys)
-        logFile << key << ";" ;
+        logFile << key.data() << ";" ;
     logFile << "\n";
     eventFile << "EVENT;EVENT_NUM;DATA_1;DATA_2;\n";
 
@@ -24,11 +24,11 @@ void GPLogger::stopLog()
     eventFile.close();
 }
 
-void GPLogger::logGaze(const std::map<std::string, double> &data)
+void GPLogger::logGaze(const QMap<QByteArray, double>  &data)
 {
     if(!isStarted) return;
     for(auto &&key: keys)
-        logFile << data.at(key) << ";" ;
+        logFile << data.value(key) << ";" ;
     logFile << "\n";
 }
 
@@ -60,20 +60,20 @@ GPDataParser::GPDataParser()
     keys.append("BPOGV");
 }
 
-std::map<std::string, double> GPDataParser::parseData(const std::string &data)
+QMap<QByteArray, double> GPDataParser::parseData(const QByteArray &data)
 {
-    std::map<std::string, double> temp;
-    if(data.substr(1,3).compare("REC")){
+    QMap<QByteArray, double> temp;
+    if(data.mid(1,3)  == "REC"){
         temp["valid"] = 0;
     }
     else {
         temp["valid"] = 1;
         for(auto &&key: keys){
-            size_t t_1 = data.find(key, 0);
-            size_t t_2 = data.find('\"', t_1)+1;
-            size_t t_3 = data.find('\"', t_2);
+            int t_1 = data.indexOf(key, 0);
+            int t_2 = data.indexOf('\"', t_1)+1;
+            int t_3 = data.indexOf('\"', t_2);
             //qDebug() << key.c_str() << data.substr(t_2, t_3-t_2).c_str();
-            temp[key] = std::stod(data.substr(t_2, t_3-t_2).c_str());
+            temp[key] = data.mid(t_2, t_3-t_2).toDouble();
         }
     }
 
