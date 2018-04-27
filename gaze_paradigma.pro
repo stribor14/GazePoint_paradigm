@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui \
+            network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -33,7 +34,8 @@ SOURCES += \
     qdot.cpp \
     gplogger.cpp \
     dynsegment.cpp \
-    statsegment.cpp
+    statsegment.cpp \
+    qgpclient.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -43,7 +45,8 @@ HEADERS += \
     gplogger.h \
     dynsegment.h \
     statsegment.h \
-    globalheader.h
+    globalheader.h \
+    qgpclient.h
 
 FORMS += \
         mainwindow.ui

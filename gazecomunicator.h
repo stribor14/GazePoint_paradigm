@@ -45,7 +45,7 @@ public:
     void setPerimeter(const double &perimeterX, const double &perimeterY, const bool &needUnlock = false);
     void setTarget(const int &num, const double &x, const double &y);
 
-public slots:
+private slots:
     void MsgLoop();
 
 signals:
