@@ -15,6 +15,7 @@ dynSegment::dynSegment(const segParams &parameters) :
 dynSegment::~dynSegment()
 {
     delete center_dot;
+    for(auto &&dot : dynDot) delete dot;
 }
 
 void dynSegment::runDynamicSegment(int lvl, int taskNum, int numDot)
