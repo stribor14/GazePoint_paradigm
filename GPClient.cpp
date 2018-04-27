@@ -84,7 +84,7 @@ void GPClient::client_disconnect ()
 UINT GPClient::GPClientThread (LPVOID param)
 {
   unsigned int result;
-  unsigned int delimiter_index;
+  size_t delimiter_index;
   string rxstr;
   char rxbuffer [RX_TCP_BUFFER_MAX];
   int state = 0;
@@ -119,13 +119,13 @@ UINT GPClient::GPClientThread (LPVOID param)
   addr.sin_addr.S_un.S_addr = inet_addr(ts->_tptr->_ip_address.c_str());
 
   connect(ipsocket, (struct sockaddr*)&addr, sizeof (addr));
-  
+
   ts->_tptr->_thread_exit = FALSE;
 
   Sleep(250);
 
   ts->_tptr->_rx_status = FALSE;
-	ts->_tptr->_connected_status = TRUE;
+    ts->_tptr->_connected_status = TRUE;
 
   do
   {
@@ -190,7 +190,7 @@ UINT GPClient::GPClientThread (LPVOID param)
       WaitForSingleObject (ts->_tptr->_tx_mutex, INFINITE);
       for (unsigned int i = 0; i < ts->_tptr->_tx_buffer.size(); i++)
       {
-        send(ipsocket, ts->_tptr->_tx_buffer.at(i).c_str(), ts->_tptr->_tx_buffer.at(i).size(), 0);
+        send(ipsocket, ts->_tptr->_tx_buffer.at(i).c_str(), static_cast<int>(ts->_tptr->_tx_buffer.at(i).size()), 0);
       }
       
       ts->_tptr->_tx_buffer.clear();
