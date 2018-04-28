@@ -1,12 +1,14 @@
 #include "gazecomunicator.h"
 
+static int tempN = 0;
+
 GazeComunicator::GazeComunicator(QObject * parent) : QObject(parent)
 {
     GP = new QGPClient();
     logger = new GPLogger();
     parser = new GPDataParser();
-    moveToThread(&thread);
-    connect(&thread, &QThread::started, this, &GazeComunicator::MsgLoop);
+
+    connect(GP, &QGPClient::msgReceived, this, &GazeComunicator::msgProcessing);
 }
 
 GazeComunicator::~GazeComunicator()
@@ -25,17 +27,12 @@ void GazeComunicator::Start()
     GP->sendCmd(R"(<SET ID="ENABLE_SEND_POG_BEST" STATE="1" />)");
 
     GP->sendCmd(R"(<SET ID="ENABLE_SEND_DATA" STATE="1" />)");
-
-    stopThread = false;
-    thread.start();
 }
 
 void GazeComunicator::Stop()
 {
-    GP->clientDisconnect();
-
-    stopThread = true;
-    thread.wait();      // if you want synchronous stop
+    if(GP->getState() == QTcpSocket::ConnectedState)
+        GP->clientDisconnect();
 }
 
 void GazeComunicator::startLog(const QString &folder, const QString &name)
@@ -69,25 +66,19 @@ void GazeComunicator::setTarget(const int &num, const double &x, const double &y
     qDebug() << x << y << num << targetPending;
 }
 
-void GazeComunicator::MsgLoop()
+void GazeComunicator::msgProcessing(const QByteArray &msg)
 {
-    QList<QByteArray> buffer;
-    while(!stopThread){
-        GP->getMsgBuffer(buffer);
-        for(auto &&data: buffer){
-            if(data.at(0) != '<') break; // if data doesnt start with '<'
-            QMap<QByteArray, double>  temp = parser->parseData(data);
-            if(temp["valid"] == 0) continue;
-            logger->logGaze(temp);
-            if(targetPending){
-                if(fabs(temp["BPOGX"] - targetX) < targetPerimeterX && fabs(temp["BPOGY"] - targetY) < targetPerimeterY){
-                    targetPending = false;
-                    logger->logEvent("DOT_GAZED", targetNum, temp["CNT"], temp["TIME"], targetX, targetY);
-                    if(targetUnlock) emit targetReached();
-                }
-            }
+    if(msg.at(0) != '<') return; // if data doesnt start with '<'
+    QMap<QByteArray, double>  temp = parser->parseData(msg);
+    if(temp.value("valid") == 0) return;
+if( temp.value("CNT") - tempN > 1 ) qDebug() << temp.value("CNT") - tempN;
+tempN = temp.value("CNT");
+    logger->logGaze(temp);
+    if(targetPending){
+        if(fabs(temp.value("BPOGX") - targetX) < targetPerimeterX && fabs(temp.value("BPOGY") - targetY) < targetPerimeterY){
+            targetPending = false;
+            logger->logEvent("DOT_GAZED", targetNum, temp.value("CNT"), temp.value("TIME"), targetX, targetY);
+            if(targetUnlock) emit targetReached();
         }
-
     }
-    QThread::currentThread()->quit();
 }

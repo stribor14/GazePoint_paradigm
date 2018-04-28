@@ -42,14 +42,13 @@ MainWindow::MainWindow(QWidget *parent) :
         params.GazePt->Stop();
     });
 
-    connect(ui->b_pokreni, &QPushButton::clicked, this, [&](){
-        params.GazePt->Start();
-
+    connect(ui->b_pokreni, &QPushButton::clicked, this, [&](){       
         if(!ui->i_participant->text().compare("")){
             QMessageBox::warning(this, "Greška",
                                  "Nije unesena šifra korisnika!");
             return;
         }
+        params.GazePt->Start();
 
         fillParams(Recording);
 
@@ -98,8 +97,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    if(params.GazePt->isRunning()) params.GazePt->Stop();
-
     delete ui;
 }
 

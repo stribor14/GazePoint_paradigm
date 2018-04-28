@@ -39,7 +39,10 @@ public:
     QTcpSocket::SocketState getState(){return tcpSocket->state();}
     QTcpSocket::SocketError getLastError(){return tcpSocket->error();}
 
-signals: // forwarded from QTcpSocket
+signals:
+    void msgReceived(const QByteArray &msg);
+
+    // forwarded from QTcpSocket
     void hostFound();
     void connected();
     void disconnected();
