@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QEventLoop>
 
 #include "globalheader.h"
 #include "qdot.h"

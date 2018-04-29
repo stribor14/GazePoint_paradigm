@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QEventLoop>
 #include <QCursor>
 
 #include "globalheader.h"

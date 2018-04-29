@@ -42,18 +42,17 @@ MainWindow::MainWindow(QWidget *parent) :
         params.GazePt->Stop();
     });
 
-    connect(ui->b_pokreni, &QPushButton::clicked, this, [&](){
-        params.GazePt->Start();
-
+    connect(ui->b_pokreni, &QPushButton::clicked, this, [&](){       
         if(!ui->i_participant->text().compare("")){
             QMessageBox::warning(this, "Greška",
                                  "Nije unesena šifra korisnika!");
             return;
         }
+        params.GazePt->Start();
 
         fillParams(Recording);
 
-        int temp_taskNum = ui->i_numDynamicTask->value();
+        int dynTaskNum = ui->i_numDynamicTask->value();
 
         if(ui->i_write_log->isChecked()) params.GazePt->startLog(ui->i_log_folder->text(), ui->i_participant->text());
 
@@ -62,13 +61,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
         resetRandom();
         s_seg->runStaticSegment();
-        d_seg->runDynamicSegment(1, temp_taskNum, 8);
+        d_seg->runDynamicSegment(1, dynTaskNum, 8);
         resetRandom();
         s_seg->runStaticSegment();
-        d_seg->runDynamicSegment(2, temp_taskNum, 8);
+        d_seg->runDynamicSegment(2, dynTaskNum, 8);
         resetRandom();
         s_seg->runStaticSegment();
-        d_seg->runDynamicSegment(3, temp_taskNum, 10);
+        d_seg->runDynamicSegment(3, dynTaskNum, 10);
         resetRandom();
         s_seg->runStaticSegment();
 
@@ -98,8 +97,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    if(params.GazePt->isRunning()) params.GazePt->Stop();
-
     delete ui;
 }
 

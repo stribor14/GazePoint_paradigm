@@ -3,14 +3,10 @@
 
 #include <QObject>
 #include <QDebug>
-#include <QThread>
-#include <QMutex>
-#include <QEventLoop>
 
-#include <utility>
 #include <string>
 
-#include "QGPClient.h"
+#include "qgpclient.h"
 #include "gplogger.h"
 
 class GazeComunicator : public QObject
@@ -24,16 +20,14 @@ private:
     double targetPerimeterX;
     double targetPerimeterY;
     bool targetUnlock;
-
     bool targetPending = false;
     bool customEventPending = false;
+    bool firstMsg = false;
+    int msgNum = 0;
 
     QGPClient* GP;
     GPLogger* logger;
     GPDataParser* parser;
-    QThread thread;
-    bool stopThread;
-
 public:
     GazeComunicator(QObject * parent = NULL);
     ~GazeComunicator();
@@ -46,10 +40,8 @@ public:
     void setPerimeter(const double &perimeterX, const double &perimeterY, const bool &needUnlock = false);
     void setTarget(const int &num, const double &x, const double &y);
 
-    bool isRunning(){ return !stopThread; }
-
-private slots:
-    void MsgLoop();
+public slots:
+    void msgProcessing(const QByteArray &msg);
 
 signals:
     void targetReached();

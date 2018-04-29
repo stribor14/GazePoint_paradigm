@@ -34,7 +34,7 @@ SOURCES += \
     gplogger.cpp \
     dynsegment.cpp \
     statsegment.cpp \
-    qgpclient.cpp
+    QGPClient/qgpclient.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -44,11 +44,11 @@ HEADERS += \
     dynsegment.h \
     statsegment.h \
     globalheader.h \
-    qgpclient.h
+    QGPClient/qgpclient.h
 
 FORMS += \
         mainwindow.ui
 
-INCLUDEPATH += C:\PROGRA~2\2017\Community\VC\Tools\MSVC\14.13.26128\atlmfc\include
+INCLUDEPATH += QGPClient
 
 DEFINES += _AFXDLL

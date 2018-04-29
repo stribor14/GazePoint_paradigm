@@ -1,0 +1,3 @@
+[submodule "QGPClient"]
+	path = QGPClient
+	url = https://github.com/stribor14/QGPClient
