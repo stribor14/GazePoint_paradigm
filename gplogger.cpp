@@ -30,11 +30,12 @@ void GPLogger::logGaze(const QMap<QByteArray, double>  &data)
     for(auto &&key: keys)
         logFile << data.value(key) << ";" ;
     logFile << "\n";
+    //qDebug() << data;
 }
 
 void GPLogger::logEvent(const std::string &eventDescriptor, double eventNumber, double data1, double data2, double data3, double data4)
 {
-    qDebug() << eventDescriptor.c_str() << ";" << eventNumber << ";" << data1 << ";" << data2 << ";" << data3 << ";" << data4;
+    //qDebug() << eventDescriptor.c_str() << ";" << eventNumber << ";" << data1 << ";" << data2 << ";" << data3 << ";" << data4;
 
     if(!isStarted) return;
     eventFile << eventDescriptor << ";" << eventNumber << ";" << data1 << ";" << data2 << ";" << data3 << ";" << data4 << ";\n" ;

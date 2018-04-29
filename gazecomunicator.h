@@ -20,9 +20,10 @@ private:
     double targetPerimeterX;
     double targetPerimeterY;
     bool targetUnlock;
-
     bool targetPending = false;
     bool customEventPending = false;
+    bool firstMsg = false;
+    int msgNum = 0;
 
     QGPClient* GP;
     GPLogger* logger;

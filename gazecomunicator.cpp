@@ -1,7 +1,5 @@
 #include "gazecomunicator.h"
 
-static int tempN = 0;
-
 GazeComunicator::GazeComunicator(QObject * parent) : QObject(parent)
 {
     GP = new QGPClient();
@@ -27,6 +25,7 @@ void GazeComunicator::Start()
     GP->sendCmd(R"(<SET ID="ENABLE_SEND_POG_BEST" STATE="1" />)");
 
     GP->sendCmd(R"(<SET ID="ENABLE_SEND_DATA" STATE="1" />)");
+    firstMsg = true;
 }
 
 void GazeComunicator::Stop()
@@ -71,8 +70,20 @@ void GazeComunicator::msgProcessing(const QByteArray &msg)
     if(msg.at(0) != '<') return; // if data doesnt start with '<'
     QMap<QByteArray, double>  temp = parser->parseData(msg);
     if(temp.value("valid") == 0) return;
-if( temp.value("CNT") - tempN > 1 ) qDebug() << temp.value("CNT") - tempN;
-tempN = temp.value("CNT");
+
+    if(temp.value("CNT") <= msgNum) return;
+    if(temp.value("CNT") - msgNum > 1)
+        if(!firstMsg){
+            qDebug() << temp.value("CNT") - msgNum;
+            QList<QByteArray> msgBuffer;
+            GP->getMsgBuffer(msgBuffer);
+            for(auto &&oldMsg: msgBuffer) msgProcessing(oldMsg);
+            return;
+        }
+    else firstMsg = false;
+    GP->clearBuffer();
+    msgNum = temp.value("CNT");
+
     logger->logGaze(temp);
     if(targetPending){
         if(fabs(temp.value("BPOGX") - targetX) < targetPerimeterX && fabs(temp.value("BPOGY") - targetY) < targetPerimeterY){

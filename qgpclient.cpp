@@ -10,16 +10,21 @@ void QGPClient::receiveData()
     {
         bufferMutex.lock();
             buffer.append(data.mid(0, delimiter_index));
-            emit msgReceived(buffer.last());
-            while (buffer.size() > bufferSize)
-            {
-                buffer.removeFirst();
+            if (notifySetting == msgSignal::notifyEveryMsg)
+                emit msgReceived(buffer.last());
+            if (buffer.size() >= bufferSize){
+                if(notifySetting == msgSignal::notifyFullBuffer)
+                    emit msgReceived(buffer.last());
+                while (buffer.size() > bufferSize)
+                        buffer.removeFirst();
             }
         bufferMutex.unlock();
 
         data.remove(0, delimiter_index+2);
         delimiter_index = data.indexOf("\r\n", 0);
     }
+    if(notifySetting == msgSignal::notifyEveryCycle)
+        emit msgReceived(buffer.last());
 }
 
 QGPClient::QGPClient(QObject * parent) : QObject(parent),

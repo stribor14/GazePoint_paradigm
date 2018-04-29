@@ -8,6 +8,14 @@
 class QGPClient : public QObject
 {
     Q_OBJECT
+public:
+    enum msgSignal{
+        dontNotify,
+        notifyEveryMsg,
+        notifyEveryCycle,
+        notifyFullBuffer
+    };
+
 private:
     QTcpSocket *tcpSocket;
 
@@ -18,6 +26,7 @@ private:
     int bufferSize;
     QMutex bufferMutex;
 
+    msgSignal notifySetting = notifyEveryCycle;
 private slots:
     void receiveData();
 
@@ -27,6 +36,7 @@ public:
 
     void setAddress (QString address) {ipAddress = address;} // set server IP address
     void setPort (unsigned int port) {ipPort = port;} // set server IP port
+    void setNotifySetting(msgSignal value){ notifySetting = value; }
 
     bool clientConnect();
     bool clientDisconnect();
@@ -34,6 +44,7 @@ public:
     void sendCmd(QByteArray cmd);
 
     void getMsgBuffer(QList<QByteArray> &data);
+    void clearBuffer(){buffer.clear();}
     QByteArray getLastMsg(); // WARNING: clearing the buffer content
 
     QTcpSocket::SocketState getState(){return tcpSocket->state();}
