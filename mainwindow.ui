@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Gaze Paradigma v0.1 - HZKP 2018</string>
+   <string>Gaze Paradigma v1.0 - HZKP 2018</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QWidget" name="verticalLayoutWidget">

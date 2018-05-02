@@ -61,12 +61,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
         resetRandom();
         s_seg->runStaticSegment();
+        resetRandom();
         d_seg->runDynamicSegment(1, dynTaskNum, 8);
         resetRandom();
         s_seg->runStaticSegment();
+        resetRandom();
         d_seg->runDynamicSegment(2, dynTaskNum, 8);
         resetRandom();
         s_seg->runStaticSegment();
+        resetRandom();
         d_seg->runDynamicSegment(3, dynTaskNum, 10);
         resetRandom();
         s_seg->runStaticSegment();

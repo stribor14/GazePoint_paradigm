@@ -1,6 +1,6 @@
 #include "gplogger.h"
 
-QList<QByteArray> keys;
+static QList<QByteArray> keys;
 
 void GPLogger::startLog(const QString &folder, const QString &name)
 {
