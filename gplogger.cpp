@@ -5,13 +5,17 @@ static QList<QByteArray> keys;
 void GPLogger::startLog(const QString &folder, const QString &name)
 {
     QString temp = folder + "/" + QDateTime::currentDateTime().toString("yy_MM_dd-hh_mm") + "__" + name;
-    logFile.open((temp + "_LOG.csv").toStdString(), std::ofstream::out | std::ofstream::app);
-    eventFile.open((temp + "_EVENT.csv").toStdString(), std::ofstream::out | std::ofstream::app);
+    logFile.setFileName(temp + "_LOG.csv");
+    eventFile.setFileName(temp + "_EVENT.csv");
+    logFile.open(QIODevice::WriteOnly);
+    eventFile.open(QIODevice::WriteOnly);
+    logStream.setDevice(&logFile);
+    eventStream.setDevice(&eventFile);
 
     for(auto &&key: keys)
-        logFile << key.data() << ";" ;
-    logFile << "\n";
-    eventFile << "EVENT;EVENT_NUM;DATA_1;DATA_2;\n";
+        logStream << key.data() << ";" ;
+    logStream << "\n";
+    eventStream << "EVENT;EVENT_NUM;DATA_1;DATA_2;\n";
 
     isStarted = true;
 }
@@ -28,17 +32,17 @@ void GPLogger::logGaze(const QMap<QByteArray, double>  &data)
 {
     if(!isStarted) return;
     for(auto &&key: keys)
-        logFile << data.value(key) << ";" ;
-    logFile << "\n";
+        logStream << data.value(key) << ";" ;
+    logStream << "\n";
     //qDebug() << data;
 }
 
-void GPLogger::logEvent(const std::string &eventDescriptor, double eventNumber, double data1, double data2, double data3, double data4)
+void GPLogger::logEvent(const QString &eventDescriptor, double eventNumber, double data1, double data2, double data3, double data4)
 {
     //qDebug() << eventDescriptor.c_str() << ";" << eventNumber << ";" << data1 << ";" << data2 << ";" << data3 << ";" << data4;
 
     if(!isStarted) return;
-    eventFile << eventDescriptor << ";" << eventNumber << ";" << data1 << ";" << data2 << ";" << data3 << ";" << data4 << ";\n" ;
+    eventStream << eventDescriptor << ";" << eventNumber << ";" << data1 << ";" << data2 << ";" << data3 << ";" << data4 << ";\n" ;
 }
 
 

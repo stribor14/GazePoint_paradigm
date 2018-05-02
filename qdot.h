@@ -19,18 +19,18 @@ public:
     ~QDot(){}
 
     bool isTarget();
-    void setTarget(const bool &state);
+    void setTarget(bool state);
 
-    void setSize(const int &size);
-    void setCord(const double &x, const double &y);
-    void setAngle(const double &angle);
-    void setSpeed(const double &speed);
+    void setSize(int size);
+    void setCord(double x, const double y);
+    void setAngle(double angle);
+    void setSpeed(double speed);
     double getAngle();
     double getDist();
     double getSpeed();
     int getResult();
-    void moveDot(const double &angle, const double &dist);
-    void moveDot(const double &dist);
+    void moveDot(double angle, double dist);
+    void moveDot(double dist);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent * event);

@@ -4,8 +4,6 @@
 #include <QObject>
 #include <QDebug>
 
-#include <string>
-
 #include "qgpclient.h"
 #include "gplogger.h"
 
@@ -36,9 +34,9 @@ public:
     void startLog(const QString &folder, const QString &name);
     void stopLog();
 
-    void logCustomEvent(const std::string &eventDescriptor, double eventNumber, double data1, double data2, double data3 = 0, double data4 = 0);
-    void setPerimeter(const double &perimeterX, const double &perimeterY, const bool &needUnlock = false);
-    void setTarget(const int &num, const double &x, const double &y);
+    void logCustomEvent(const QString &eventDescriptor, double eventNumber, double data1, double data2, double data3 = 0, double data4 = 0);
+    void setPerimeter(double perimeterX, double perimeterY, bool needUnlock = false);
+    void setTarget(int num, double x, double y);
 
 public slots:
     void msgProcessing(const QByteArray &msg);

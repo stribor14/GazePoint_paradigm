@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
         resetRandom();
         s_seg->runStaticSegment();
+        resetRandom();
         d_seg->runDynamicSegment(1, 1, 8);
 
         params.display->close();

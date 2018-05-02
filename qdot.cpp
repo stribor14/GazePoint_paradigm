@@ -10,24 +10,24 @@ bool QDot::isTarget(){
     return target;
 }
 
-void QDot::setTarget(const bool &state){
-    target = state
-            ;}
+void QDot::setTarget(bool state){
+    target = state;
+}
 
-void QDot::setSize(const int &size)
+void QDot::setSize(int size)
 {
     dotSize = size;
 }
 
-void QDot::setCord(const double &x, const double &y){
+void QDot::setCord(double x, double y){
     this->setRect(x - dotSize/2, y - dotSize/2, dotSize, dotSize);
 }
 
-void QDot::setAngle(const double &angle){
+void QDot::setAngle(double angle){
     dotAngle = angle;
 }
 
-void QDot::setSpeed(const double &speed)
+void QDot::setSpeed(double speed)
 {
     dotSpeed = speed;
 }
@@ -50,7 +50,7 @@ int QDot::getResult()
     return this->brush() == QBrush(Qt::green) ? 1 : this->brush() == QBrush(Qt::yellow) ? -1 : 0;
 }
 
-void QDot::moveDot(const double &angle, const double &dist){
+void QDot::moveDot(double angle, double dist){
     dotAngle += angle;
     QRectF tempCurrent = this->rect();
     oldDist = dist;
@@ -59,7 +59,7 @@ void QDot::moveDot(const double &angle, const double &dist){
                   dotSize, dotSize);
 }
 
-void QDot::moveDot(const double &dist)
+void QDot::moveDot(double dist)
 {
     QRectF tempCurrent = this->rect();
     oldDist = dist;

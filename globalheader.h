@@ -4,7 +4,6 @@
 #pragma once
 
 #include <random>
-#include <functional>
 
 #include "gazecomunicator.h"
 

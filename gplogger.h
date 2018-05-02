@@ -6,9 +6,7 @@
 #include <QDebug>
 #include <QMap>
 #include <QVector>
-
-#include <fstream>
-#include <string>
+#include <QFile>
 
 class GPLogger
 {
@@ -17,11 +15,13 @@ public:
     void startLog(const QString &folder, const QString &name);
     void stopLog();
     void logGaze(const QMap<QByteArray, double> &data);
-    void logEvent(const std::string &eventDescriptor, double eventNumber, double data1, double data2, double data3 = 0, double data4 = 0);
+    void logEvent(const QString &eventDescriptor, double eventNumber, double data1, double data2, double data3 = 0, double data4 = 0);
 
 private:
-    std::ofstream logFile;
-    std::ofstream eventFile;
+    QFile logFile;
+    QFile eventFile;
+    QTextStream logStream;
+    QTextStream eventStream;
 
     bool isStarted = false;
 };

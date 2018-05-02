@@ -44,19 +44,19 @@ void GazeComunicator::stopLog()
     logger->stopLog();
 }
 
-void GazeComunicator::logCustomEvent(const std::string &eventDescriptor, double eventNumber, double data1, double data2, double data3, double data4)
+void GazeComunicator::logCustomEvent(const QString &eventDescriptor, double eventNumber, double data1, double data2, double data3, double data4)
 {
     logger->logEvent(eventDescriptor, eventNumber, data1, data2, data3, data4);
 }
 
-void GazeComunicator::setPerimeter(const double &perimeterX, const double &perimeterY, const bool &needUnlock)
+void GazeComunicator::setPerimeter(double perimeterX, double perimeterY, bool needUnlock)
 {
      targetPerimeterX = perimeterX;
      targetPerimeterY = perimeterY;
      targetUnlock = needUnlock;
 }
 
-void GazeComunicator::setTarget(const int &num, const double &x, const double &y)
+void GazeComunicator::setTarget(int num, double x, double y)
 {
     targetNum = num;
     targetX = x;
