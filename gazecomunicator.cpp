@@ -19,12 +19,15 @@ GazeComunicator::~GazeComunicator()
 void GazeComunicator::Start()
 {
     if(!GP->clientConnect()) return;
-    GP->sendCmd(R"(<SET ID="ENABLE_SEND_TIME" STATE="1" />)");
-    GP->sendCmd(R"(<SET ID="ENABLE_SEND_COUNTER" STATE="1" />)");
-    GP->sendCmd(R"(<SET ID="ENABLE_SEND_POG_FIX" STATE="1" />)");
-    GP->sendCmd(R"(<SET ID="ENABLE_SEND_POG_BEST" STATE="1" />)");
 
-    GP->sendCmd(R"(<SET ID="ENABLE_SEND_DATA" STATE="1" />)");
+    GP->sendCommand(QList<QGPClient::dataCommands>{QGPClient::TIME,
+                                                   QGPClient::COUNTER,
+                                                   QGPClient::POG_FIX,
+                                                   QGPClient::POG_BEST},
+                    true);
+
+    GP->sendCommand(QGPClient::SEND_DATA, true);
+
     firstMsg = true;
 }
 
