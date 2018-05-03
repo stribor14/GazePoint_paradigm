@@ -45,8 +45,9 @@ void dynSegment::runDynamicSegment(int lvl, int taskNum, int numDot)
         for(int k = 0; k < numDot; k++){
             dynDot[k]->setCord(params.dispWidth/2 + cos(k*pi*2/numDot) * params.dotOffset,
                                 params.dispHeight/2 + sin(k*pi*2/numDot) * params.dotOffset);
-            dynDot[k]->setSpeed(generator_uniform()/2 + 0.5);
-            dynDot[k]->setAngle(generator_normal()/2  + k*pi*2/numDot);
+            double speed = generator_uniform()/2 + 0.5;
+            double angle = generator_normal()/2  + k*pi*2/numDot;
+            dynDot[k]->setVelocity(speed*cos(angle), speed*sin(angle));
             params.dispScene->addItem(dynDot[k]);
         }
         runTimer.singleShot(params.timeTarget * 1000, Qt::PreciseTimer, this, [&](){
@@ -59,7 +60,7 @@ void dynSegment::runDynamicSegment(int lvl, int taskNum, int numDot)
         connect(&cyclicTimer, &QTimer::timeout, this, [&](){
             for(auto &&dot: dynDot)
                 //dot->moveDot(generator_uniform()*2*pi,generator_uniform() * maxDist);
-                dot->moveDot(20);
+                dot->moveDot(15);
             collisionCheck();
         });
 
@@ -138,39 +139,82 @@ void dynSegment::setColor(int lvl)
 
 void dynSegment::collisionCheck()
 {
-    {
-        for(auto &&dot : dynDot){
-            QPointF center = dot->rect().center();
-            double angle =  dot->getAngle();
-
-            if (center.x() <= params.dispPadding)
-                dot->moveDot(pi-2*angle, (params.dispPadding - center.x()) / cos(pi - angle));
-            if (center.x() >= params.dispWidth - params.dispPadding)
-                dot->moveDot(pi-2*angle, (center.x() - (params.dispWidth - params.dispPadding)) / cos(angle));
-            if (center.y() <= params.dispPadding)
-                dot->moveDot(-2*angle, (params.dispPadding - center.y()) / sin(-angle));
-            if (center.y() >= params.dispHeight - params.dispPadding)
-                dot->moveDot(-2*angle, (center.y() - (params.dispHeight - params.dispPadding)) / sin(angle));
+    static auto edgeXCollision = [&](QDot* dot){
+        QPointF center = dot->rect().center();
+        QPair<double, double> velocity = dot->getVelocity();
+        if (center.x() <= params.dispPadding){
+            static double dist = (params.dispPadding - center.x()) / cos(pi - dot->getAngle());
+            dot->moveDot(-dist);
+            dot->setVelocity(-velocity.first, velocity.second);
+            dot->moveDot(dist);
         }
-        for (int k = 0; k < dynDot.size() ; k++){
-            for (int i = k + 1; i < dynDot.size() ; i++){
-                if(dynDot[k]->collidesWithItem(dynDot[i])){
-                    QPointF center1 = dynDot[k]->rect().center();
-                    QPointF center2 = dynDot[i]->rect().center();
-                    double dist = (params.dotSize - m_dist(center1, center2))/2;
-                    double angle = m_angle(center1, center2);
-                    double tempAngle = dynDot[k]->getAngle();
-                    double tempSpeed = dynDot[k]->getSpeed();
-                    dynDot[k]->setAngle(dynDot[i]->getAngle());
-                    dynDot[i]->setAngle(tempAngle);
-                    dynDot[k]->setSpeed(dynDot[i]->getSpeed());
-                    dynDot[i]->setSpeed(tempSpeed);
-                    dynDot[k]->setCord(center1.x() + cos(angle)*dist,
-                                       center1.y() + sin(angle)*dist);
-                    dynDot[i]->setCord(center2.x() - cos(angle)*dist,
-                                       center2.y() - sin(angle)*dist);
-                }
+        if (center.x() >= params.dispWidth - params.dispPadding){
+            static double dist = (center.x() - (params.dispWidth - params.dispPadding)) / cos(dot->getAngle());
+            dot->moveDot(-dist);
+            dot->setVelocity(-velocity.first, velocity.second);
+            dot->moveDot(dist);
+        }
+    };
+    static auto edgeYCollision = [&](QDot* dot){
+        QPointF center = dot->rect().center();
+        QPair<double, double> velocity = dot->getVelocity();
+        if (center.y() <= params.dispPadding){
+            static double dist = (params.dispPadding - center.y()) / sin(-dot->getAngle());
+            dot->moveDot(- dist);
+            dot->setVelocity(velocity.first, -velocity.second);
+            dot->moveDot(dist);
+            edgeXCollision(dot);
+        }
+        if (center.y() >= params.dispHeight - params.dispPadding){
+            static double dist = (center.y() - (params.dispHeight - params.dispPadding)) / sin(dot->getAngle());
+            dot->moveDot(-dist);
+            dot->setVelocity(velocity.first, -velocity.second);
+            dot->moveDot(dist);
+            edgeXCollision(dot);
+        }
+    };
+// (x,y) -> okotimo je (y, -x)
+// a2_x = a_x * n_x + a_y * n_y;
+// a2_y = a_x * n_y + a_y * (-n_x);
+
+// a = a2_x * N + a2_y * T;
+
+    static auto dotCollision = [&](QDot* dot1, QDot* dot2){
+        QPointF center1 = dot1->rect().center();
+        QPointF center2 = dot2->rect().center();
+        double dist = (params.dotSize - m_dist(center1, center2));
+        QPair<double, double> n((center2.x() - center1.x())/m_dist(center1, center2),
+                                (center2.y() - center1.y())/m_dist(center1, center2));
+
+        QPair<double, double> v1 = dot1->getVelocity();
+        QPair<double, double> v2 = dot2->getVelocity();
+
+        double v1_n = v1.first*n.first + v1.second*n.second;
+        double v1_t = v1.first*n.second - v1.second*n.first;
+        double v2_n = v2.first*n.first + v2.second*n.second;
+        double v2_t = v2.first*n.second - v2.second*n.first;
+
+        dot1->moveDot(-dist);
+        dot2->moveDot(-dist);
+        dot1->setVelocity(v2_n*n.first + v1_t*n.second, v2_n*n.second - v1_t*n.first);
+        dot2->setVelocity(v1_n*n.first + v2_t*n.second, v1_n*n.second - v2_t*n.first);
+        dot1->moveDot(dist);
+        dot2->moveDot(dist);
+    };
+
+    for(auto &&dot : dynDot){
+        edgeXCollision(dot);
+        edgeYCollision(dot);
+    }
+
+    bool collisionDetected = false;
+    for (int k = 0; k < dynDot.size() ; k++){
+        for (int i = k + 1; i < dynDot.size() ; i++){
+            if(m_dist(dynDot[k]->rect().center(), dynDot[i]->rect().center()) <= params.dotSize){
+                collisionDetected = true;
+                dotCollision(dynDot[k], dynDot[i]);
             }
         }
     }
+    //if(collisionDetected) collisionCheck();
 }

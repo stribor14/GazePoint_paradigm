@@ -23,26 +23,25 @@ void QDot::setCord(double x, double y){
     this->setRect(x - dotSize/2, y - dotSize/2, dotSize, dotSize);
 }
 
-void QDot::setAngle(double angle){
-    dotAngle = angle;
-}
-
-void QDot::setSpeed(double speed)
+void QDot::setVelocity(double vx, double vy)
 {
-    dotSpeed = speed;
+    dotVelocity.first = vx;
+    dotVelocity.second = vy;
 }
 
-double QDot::getAngle(){
-    return dotAngle;
-}
-
-double QDot::getDist(){
-    return oldDist;
+double QDot::getAngle()
+{
+    return atan2(dotVelocity.second, dotVelocity.first);
 }
 
 double QDot::getSpeed()
 {
-    return dotSpeed;
+    return sqrt(dotVelocity.first*dotVelocity.first + dotVelocity.second*dotVelocity.second);
+}
+
+QPair<double, double> QDot::getVelocity()
+{
+    return dotVelocity;
 }
 
 int QDot::getResult()
@@ -50,21 +49,11 @@ int QDot::getResult()
     return this->brush() == QBrush(Qt::green) ? 1 : this->brush() == QBrush(Qt::yellow) ? -1 : 0;
 }
 
-void QDot::moveDot(double angle, double dist){
-    dotAngle += angle;
-    QRectF tempCurrent = this->rect();
-    oldDist = dist;
-    this->setRect(tempCurrent.x() + cos(dotAngle)*dist*dotSpeed,
-                  tempCurrent.y() + sin(dotAngle)*dist*dotSpeed,
-                  dotSize, dotSize);
-}
-
 void QDot::moveDot(double dist)
 {
     QRectF tempCurrent = this->rect();
-    oldDist = dist;
-    this->setRect(tempCurrent.x() + cos(dotAngle)*dist*dotSpeed,
-                  tempCurrent.y() + sin(dotAngle)*dist*dotSpeed,
+    this->setRect(tempCurrent.x() + dist*dotVelocity.first,
+                  tempCurrent.y() + dist*dotVelocity.second,
                   dotSize, dotSize);
 }
 

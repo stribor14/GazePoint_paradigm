@@ -11,8 +11,7 @@ private:
     int dotSize;
     bool target = false;
     double dotAngle = 0;
-    double dotSpeed = 0;
-    double oldDist = 0;
+    QPair<double, double> dotVelocity;
 public:
     bool acceptMouse = false;
     QDot(int x, int y, int size, QBrush color);
@@ -23,13 +22,11 @@ public:
 
     void setSize(int size);
     void setCord(double x, const double y);
-    void setAngle(double angle);
-    void setSpeed(double speed);
+    void setVelocity(double vx, double vy);
     double getAngle();
-    double getDist();
     double getSpeed();
+    QPair<double, double> getVelocity();
     int getResult();
-    void moveDot(double angle, double dist);
     void moveDot(double dist);
 
 protected:
