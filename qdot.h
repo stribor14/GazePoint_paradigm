@@ -24,7 +24,6 @@ public:
     void setCord(double x, const double y);
     void setVelocity(double vx, double vy);
     double getAngle();
-    double getSpeed();
     QPair<double, double> getVelocity();
     int getResult();
     void moveDot(double dist);

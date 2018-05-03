@@ -34,11 +34,6 @@ double QDot::getAngle()
     return atan2(dotVelocity.second, dotVelocity.first);
 }
 
-double QDot::getSpeed()
-{
-    return sqrt(dotVelocity.first*dotVelocity.first + dotVelocity.second*dotVelocity.second);
-}
-
 QPair<double, double> QDot::getVelocity()
 {
     return dotVelocity;
