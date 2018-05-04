@@ -39,7 +39,7 @@ public:
     QPoint dispCenter;
     int dispWidth;
     int dispHeight;
-    int dispPadding = 150;
+    int dispPadding;
     int timeCenter;
     int timeTarget;
     int timeMovement;

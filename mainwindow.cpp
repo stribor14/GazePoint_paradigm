@@ -112,6 +112,7 @@ void MainWindow::fillParams(paramSetting setting)
         params.useGaze = ui->i_gazePoint->isChecked();
         params.dispWidth = screenres.width();
         params.dispHeight = screenres.height();
+        params.dispPadding = params.dotSize/2;
         params.dispCenter = QPoint(screenres.center());
         params.dispScene->setSceneRect(0,0, params.dispWidth, params.dispHeight);
         params.display->move(QPoint(screenres.x(), screenres.y()));
@@ -137,6 +138,7 @@ void MainWindow::fillParams(paramSetting setting)
         params.useGaze = ui->i_gazePoint->isChecked();
         params.dispWidth = screenres.width();
         params.dispHeight = screenres.height();
+        params.dispPadding = params.dotSize/2;
         params.dispCenter = QPoint(screenres.center());
         params.dispScene->setSceneRect(0,0, params.dispWidth, params.dispHeight);
         params.display->move(QPoint(screenres.x(), screenres.y()));

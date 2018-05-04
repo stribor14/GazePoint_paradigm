@@ -59,7 +59,7 @@ void dynSegment::runDynamicSegment(int lvl, int taskNum, int numDot)
         // part 3
         connect(&cyclicTimer, &QTimer::timeout, this, [&](){
             for(auto &&dot: dynDot)
-                dot->moveDot(17);
+                dot->moveDot(20);
             collisionCheck();
         });
 
