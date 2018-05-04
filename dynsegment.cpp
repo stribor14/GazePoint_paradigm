@@ -151,44 +151,32 @@ void dynSegment::collisionCheck()
 
 void dynSegment::edgeXCollision(QDot* dot){
     if (dot->rect().center().x() <= params.dispPadding){
-        int cnt = 0;
-        while(dot->rect().center().x() < params.dispPadding){
-            dot->moveDot(-1);
-            cnt++;
-        }
+        double dT = (params.dispPadding - dot->rect().center().x()) / -dot->getVelocity().first;
+        dot->moveDot(-dT);
         dot->setVelocity(-dot->getVelocity().first, dot->getVelocity().second);
-        dot->moveDot(cnt);
+        dot->moveDot(dT);
     }
     if (dot->rect().center().x() >= params.dispWidth - params.dispPadding){
-        int cnt = 0;
-        while(dot->rect().center().x() > params.dispWidth - params.dispPadding){
-            dot->moveDot(-1);
-            cnt++;
-        }
+        double dT = (dot->rect().center().x() - (params.dispWidth - params.dispPadding)) / dot->getVelocity().first;
+        dot->moveDot(-dT);
         dot->setVelocity(-dot->getVelocity().first, dot->getVelocity().second);
-        dot->moveDot(cnt);
+        dot->moveDot(dT);
     }
 }
 
 void dynSegment::edgeYCollision(QDot* dot){
     if (dot->rect().center().y() <= params.dispPadding){
-        int cnt = 0;
-        while(dot->rect().center().y() < params.dispPadding){
-            dot->moveDot(-1);
-            cnt++;
-        }
+        double dT = (params.dispPadding - dot->rect().center().y()) / -dot->getVelocity().second;
+        dot->moveDot(-dT);
         dot->setVelocity(dot->getVelocity().first, -dot->getVelocity().second);
-        dot->moveDot(cnt);
+        dot->moveDot(dT);
         edgeXCollision(dot);
     }
     if (dot->rect().center().y() >= params.dispHeight - params.dispPadding){
-        int cnt = 0;
-        while(dot->rect().center().y() > params.dispHeight - params.dispPadding){
-            dot->moveDot(-1);
-            cnt++;
-        }
+        double dT = (dot->rect().center().y() - (params.dispHeight - params.dispPadding)) / dot->getVelocity().second;
+        dot->moveDot(-dT);
         dot->setVelocity(dot->getVelocity().first, -dot->getVelocity().second);
-        dot->moveDot(cnt);
+        dot->moveDot(dT);
         edgeXCollision(dot);
     }
 }
@@ -205,15 +193,14 @@ void dynSegment::dotCollision(QDot* dot1, QDot* dot2){
     double v2_n = v2.first*n.first + v2.second*n.second;
     double v2_t = v2.first*n.second - v2.second*n.first;
 
-    int cnt = 0;
-    while(m_dist(dot1->rect().center(), dot2->rect().center()) < params.dotSize){
-        dot1->moveDot(-1);
-        dot2->moveDot(-1);
-        cnt++;
-    }
+    double dT = (params.dotSize - m_dist(dot1->rect().center(), dot2->rect().center()))/ (v1_n-v2_n);
+
+    dot1->moveDot(-dT);
+    dot1->moveDot(-dT);
+
     dot1->setVelocity(v2_n*n.first + v1_t*n.second, v2_n*n.second - v1_t*n.first);
     dot2->setVelocity(v1_n*n.first + v2_t*n.second, v1_n*n.second - v2_t*n.first);
 
-    dot1->moveDot(cnt);
-    dot2->moveDot(cnt);
+    dot1->moveDot(dT);
+    dot2->moveDot(dT);
 }

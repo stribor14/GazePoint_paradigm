@@ -44,11 +44,11 @@ int QDot::getResult()
     return this->brush() == QBrush(Qt::green) ? 1 : this->brush() == QBrush(Qt::yellow) ? -1 : 0;
 }
 
-void QDot::moveDot(double dist)
+void QDot::moveDot(double dT)
 {
     QRectF tempCurrent = this->rect();
-    this->setRect(tempCurrent.x() + dist*dotVelocity.first,
-                  tempCurrent.y() + dist*dotVelocity.second,
+    this->setRect(tempCurrent.x() + dT*dotVelocity.first,
+                  tempCurrent.y() + dT*dotVelocity.second,
                   dotSize, dotSize);
 }
 

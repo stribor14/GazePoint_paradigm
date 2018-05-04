@@ -26,7 +26,7 @@ public:
     double getAngle();
     QPair<double, double> getVelocity();
     int getResult();
-    void moveDot(double dist);
+    void moveDot(double dT);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent * event);
