@@ -59,7 +59,7 @@ void dynSegment::runDynamicSegment(int lvl, int taskNum, int numDot)
         // part 3
         connect(&cyclicTimer, &QTimer::timeout, this, [&](){
             for(auto &&dot: dynDot)
-                dot->moveDot(14);
+                dot->moveDot(17);
             collisionCheck();
         });
 
@@ -150,47 +150,52 @@ void dynSegment::collisionCheck()
 }
 
 void dynSegment::edgeXCollision(QDot* dot){
-    QPointF center = dot->rect().center();
-    QPair<double, double> velocity = dot->getVelocity();
-    if (center.x() <= params.dispPadding){
-        double dist = (params.dispPadding - center.x()) / cos(pi - dot->getAngle());
-        dot->moveDot(-dist);
-        dot->setVelocity(-velocity.first, velocity.second);
-        dot->moveDot(dist);
+    if (dot->rect().center().x() <= params.dispPadding){
+        int cnt = 0;
+        while(dot->rect().center().x() < params.dispPadding){
+            dot->moveDot(-1);
+            cnt++;
+        }
+        dot->setVelocity(-dot->getVelocity().first, dot->getVelocity().second);
+        dot->moveDot(cnt);
     }
-    if (center.x() >= params.dispWidth - params.dispPadding){
-        double dist = (center.x() - (params.dispWidth - params.dispPadding)) / cos(dot->getAngle());
-        dot->moveDot(-dist);
-        dot->setVelocity(-velocity.first, velocity.second);
-        dot->moveDot(dist);
+    if (dot->rect().center().x() >= params.dispWidth - params.dispPadding){
+        int cnt = 0;
+        while(dot->rect().center().x() > params.dispWidth - params.dispPadding){
+            dot->moveDot(-1);
+            cnt++;
+        }
+        dot->setVelocity(-dot->getVelocity().first, dot->getVelocity().second);
+        dot->moveDot(cnt);
     }
 }
 
 void dynSegment::edgeYCollision(QDot* dot){
-    QPointF center = dot->rect().center();
-    QPair<double, double> velocity = dot->getVelocity();
-    if (center.y() <= params.dispPadding){
-        double dist = (params.dispPadding - center.y()) / sin(-dot->getAngle());
-        dot->moveDot(- dist);
-        dot->setVelocity(velocity.first, -velocity.second);
-        dot->moveDot(dist);
+    if (dot->rect().center().y() <= params.dispPadding){
+        int cnt = 0;
+        while(dot->rect().center().y() < params.dispPadding){
+            dot->moveDot(-1);
+            cnt++;
+        }
+        dot->setVelocity(dot->getVelocity().first, -dot->getVelocity().second);
+        dot->moveDot(cnt);
         edgeXCollision(dot);
     }
-    if (center.y() >= params.dispHeight - params.dispPadding){
-        double dist = (center.y() - (params.dispHeight - params.dispPadding)) / sin(dot->getAngle());
-        dot->moveDot(-dist);
-        dot->setVelocity(velocity.first, -velocity.second);
-        dot->moveDot(dist);
+    if (dot->rect().center().y() >= params.dispHeight - params.dispPadding){
+        int cnt = 0;
+        while(dot->rect().center().y() > params.dispHeight - params.dispPadding){
+            dot->moveDot(-1);
+            cnt++;
+        }
+        dot->setVelocity(dot->getVelocity().first, -dot->getVelocity().second);
+        dot->moveDot(cnt);
         edgeXCollision(dot);
     }
 }
 
 void dynSegment::dotCollision(QDot* dot1, QDot* dot2){
-    QPointF center1 = dot1->rect().center();
-    QPointF center2 = dot2->rect().center();
-    double dist = params.dotSize - m_dist(center1, center2);
-    QPair<double, double> n((center2.x() - center1.x())/m_dist(center1, center2),
-                            (center2.y() - center1.y())/m_dist(center1, center2));
+    QPair<double, double> n((dot2->rect().center().x() - dot1->rect().center().x())/m_dist(dot1->rect().center(), dot2->rect().center()),
+                            (dot2->rect().center().y() - dot1->rect().center().y())/m_dist(dot1->rect().center(), dot2->rect().center()));
 
     QPair<double, double> v1 = dot1->getVelocity();
     QPair<double, double> v2 = dot2->getVelocity();
@@ -200,10 +205,15 @@ void dynSegment::dotCollision(QDot* dot1, QDot* dot2){
     double v2_n = v2.first*n.first + v2.second*n.second;
     double v2_t = v2.first*n.second - v2.second*n.first;
 
-    dot1->moveDot(-dist);
-    dot2->moveDot(-dist);
+    int cnt = 0;
+    while(m_dist(dot1->rect().center(), dot2->rect().center()) < params.dotSize){
+        dot1->moveDot(-1);
+        dot2->moveDot(-1);
+        cnt++;
+    }
     dot1->setVelocity(v2_n*n.first + v1_t*n.second, v2_n*n.second - v1_t*n.first);
     dot2->setVelocity(v1_n*n.first + v2_t*n.second, v1_n*n.second - v2_t*n.first);
-    dot1->moveDot(dist);
-    dot2->moveDot(dist);
+
+    dot1->moveDot(cnt);
+    dot2->moveDot(cnt);
 }
