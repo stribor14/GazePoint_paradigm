@@ -24,8 +24,8 @@ private:
     void collisionCheck();
 
     void dotCollision(QDot *dot1, QDot *dot2);
-    void edgeYCollision(QDot *dot);
-    void edgeXCollision(QDot *dot);
+    bool edgeYCollision(QDot *dot);
+    bool edgeXCollision(QDot *dot);
 public:
     dynSegment(const segParams &parameters);
     ~dynSegment();

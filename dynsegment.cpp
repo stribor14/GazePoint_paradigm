@@ -138,47 +138,56 @@ void dynSegment::setColor(int lvl)
 
 void dynSegment::collisionCheck()
 {
+    bool collisionExists = false;
     for(auto &&dot : dynDot){
-        edgeXCollision(dot);
-        edgeYCollision(dot);
+        collisionExists |= edgeXCollision(dot);
+        collisionExists |= edgeYCollision(dot);
     }
-
     for (int k = 0; k < dynDot.size() ; k++)
         for (int i = k + 1; i < dynDot.size() ; i++)
-            if(m_dist(dynDot[k]->rect().center(), dynDot[i]->rect().center()) <= params.dotSize)
+            if(m_dist(dynDot[k]->rect().center(), dynDot[i]->rect().center()) <= params.dotSize){
+                collisionExists = true;
                 dotCollision(dynDot[k], dynDot[i]);
+            }
+    if(collisionExists) collisionCheck();
 }
 
-void dynSegment::edgeXCollision(QDot* dot){
+bool dynSegment::edgeXCollision(QDot* dot){
+    bool collisionExists = false;
     if (dot->rect().center().x() <= params.dispPadding){
         double dT = (params.dispPadding - dot->rect().center().x()) / -dot->getVelocity().first;
         dot->moveDot(-dT);
         dot->setVelocity(-dot->getVelocity().first, dot->getVelocity().second);
         dot->moveDot(dT);
+        collisionExists = true;
     }
     if (dot->rect().center().x() >= params.dispWidth - params.dispPadding){
         double dT = (dot->rect().center().x() - (params.dispWidth - params.dispPadding)) / dot->getVelocity().first;
         dot->moveDot(-dT);
         dot->setVelocity(-dot->getVelocity().first, dot->getVelocity().second);
         dot->moveDot(dT);
+        collisionExists = true;
     }
+    return collisionExists;
 }
 
-void dynSegment::edgeYCollision(QDot* dot){
+bool dynSegment::edgeYCollision(QDot* dot){
+    bool collisionExists = false;
     if (dot->rect().center().y() <= params.dispPadding){
         double dT = (params.dispPadding - dot->rect().center().y()) / -dot->getVelocity().second;
         dot->moveDot(-dT);
         dot->setVelocity(dot->getVelocity().first, -dot->getVelocity().second);
         dot->moveDot(dT);
-        edgeXCollision(dot);
+        collisionExists = true;
     }
     if (dot->rect().center().y() >= params.dispHeight - params.dispPadding){
         double dT = (dot->rect().center().y() - (params.dispHeight - params.dispPadding)) / dot->getVelocity().second;
         dot->moveDot(-dT);
         dot->setVelocity(dot->getVelocity().first, -dot->getVelocity().second);
         dot->moveDot(dT);
-        edgeXCollision(dot);
+        collisionExists = true;
     }
+    return collisionExists;
 }
 
 void dynSegment::dotCollision(QDot* dot1, QDot* dot2){
@@ -196,7 +205,7 @@ void dynSegment::dotCollision(QDot* dot1, QDot* dot2){
     double dT = (params.dotSize - m_dist(dot1->rect().center(), dot2->rect().center()))/ (v1_n-v2_n);
 
     dot1->moveDot(-dT);
-    dot1->moveDot(-dT);
+    dot2->moveDot(-dT);
 
     dot1->setVelocity(v2_n*n.first + v1_t*n.second, v2_n*n.second - v1_t*n.first);
     dot2->setVelocity(v1_n*n.first + v2_t*n.second, v1_n*n.second - v2_t*n.first);
