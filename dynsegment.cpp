@@ -145,10 +145,8 @@ void dynSegment::collisionCheck()
     }
     for (int k = 0; k < dynDot.size() ; k++)
         for (int i = k + 1; i < dynDot.size() ; i++)
-            if(m_dist(dynDot[k]->rect().center(), dynDot[i]->rect().center()) <= params.dotSize){
-                collisionExists = true;
-                dotCollision(dynDot[k], dynDot[i]);
-            }
+            collisionExists |= dotCollision(dynDot[k], dynDot[i]);
+
     if(collisionExists) collisionCheck();
 }
 
@@ -190,26 +188,31 @@ bool dynSegment::edgeYCollision(QDot* dot){
     return collisionExists;
 }
 
-void dynSegment::dotCollision(QDot* dot1, QDot* dot2){
-    QPair<double, double> n((dot2->rect().center().x() - dot1->rect().center().x())/m_dist(dot1->rect().center(), dot2->rect().center()),
-                            (dot2->rect().center().y() - dot1->rect().center().y())/m_dist(dot1->rect().center(), dot2->rect().center()));
+bool dynSegment::dotCollision(QDot* dot1, QDot* dot2){
+    if(params.dotSize >= m_dist(dot1->rect().center(), dot2->rect().center())){
+        QPair<double, double> n((dot2->rect().center().x() - dot1->rect().center().x())/m_dist(dot1->rect().center(), dot2->rect().center()),
+                                (dot2->rect().center().y() - dot1->rect().center().y())/m_dist(dot1->rect().center(), dot2->rect().center()));
 
-    QPair<double, double> v1 = dot1->getVelocity();
-    QPair<double, double> v2 = dot2->getVelocity();
+        QPair<double, double> v1 = dot1->getVelocity();
+        QPair<double, double> v2 = dot2->getVelocity();
 
-    double v1_n = v1.first*n.first + v1.second*n.second;
-    double v1_t = v1.first*n.second - v1.second*n.first;
-    double v2_n = v2.first*n.first + v2.second*n.second;
-    double v2_t = v2.first*n.second - v2.second*n.first;
+        double v1_n = v1.first*n.first + v1.second*n.second;
+        double v1_t = v1.first*n.second - v1.second*n.first;
+        double v2_n = v2.first*n.first + v2.second*n.second;
+        double v2_t = v2.first*n.second - v2.second*n.first;
 
-    double dT = (params.dotSize - m_dist(dot1->rect().center(), dot2->rect().center()))/ (v1_n-v2_n);
+        double dT = (params.dotSize - m_dist(dot1->rect().center(), dot2->rect().center()))/ (v1_n-v2_n);
 
-    dot1->moveDot(-dT);
-    dot2->moveDot(-dT);
+        dot1->moveDot(-dT);
+        dot2->moveDot(-dT);
 
-    dot1->setVelocity(v2_n*n.first + v1_t*n.second, v2_n*n.second - v1_t*n.first);
-    dot2->setVelocity(v1_n*n.first + v2_t*n.second, v1_n*n.second - v2_t*n.first);
+        dot1->setVelocity(v2_n*n.first + v1_t*n.second, v2_n*n.second - v1_t*n.first);
+        dot2->setVelocity(v1_n*n.first + v2_t*n.second, v1_n*n.second - v2_t*n.first);
 
-    dot1->moveDot(dT);
-    dot2->moveDot(dT);
+        dot1->moveDot(dT);
+        dot2->moveDot(dT);
+
+        return true;
+    }
+    else return false;
 }

@@ -23,7 +23,7 @@ private:
     void setColor(int lvl);
     void collisionCheck();
 
-    void dotCollision(QDot *dot1, QDot *dot2);
+    bool dotCollision(QDot *dot1, QDot *dot2);
     bool edgeYCollision(QDot *dot);
     bool edgeXCollision(QDot *dot);
 public:
