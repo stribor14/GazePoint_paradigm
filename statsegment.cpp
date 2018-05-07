@@ -5,8 +5,8 @@ QPair<double, double> statSegment::generateNewCords()
     runTimer.setTimerType(Qt::PreciseTimer);
     cyclicTimer.setTimerType(Qt::PreciseTimer);
 
-    double newX = generator_uniform() * (params.dispWidth - 2*params.dispPadding) + params.dispPadding;
-    double newY = generator_uniform() * (params.dispHeight - 2*params.dispPadding) + params.dispPadding;
+    double newX = generator_uniform() * (params.dispWidth - 2*params.dispPadding - 300) + params.dispPadding + 150;
+    double newY = generator_uniform() * (params.dispHeight - 2*params.dispPadding - 300) + params.dispPadding + 150;
     return QPair<double, double>(newX, newY);
 }
 

@@ -152,9 +152,9 @@ void MainWindow::fillParams(paramSetting setting)
 
 
         params.timeCenter = 2;
-        params.timeTarget = 5;
+        params.timeTarget = 3;
         params.timeMovement = 5;
-        params.timeAnswer = 10;
+        params.timeAnswer = 5;
 
         params.GazePt->setPerimeter((params.dotPerimeter / params.dispWidth), (params.dotPerimeter / params.dispHeight), params.useGaze);
     }
