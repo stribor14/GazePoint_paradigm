@@ -23,6 +23,8 @@ void GazeComunicator::Start()
     GP->sendCmd(R"(<SET ID="ENABLE_SEND_COUNTER" STATE="1" />)");
     GP->sendCmd(R"(<SET ID="ENABLE_SEND_POG_FIX" STATE="1" />)");
     GP->sendCmd(R"(<SET ID="ENABLE_SEND_POG_BEST" STATE="1" />)");
+    GP->sendCmd(R"(<SET ID="ENABLE_SEND_PUPIL_LEFT" STATE="1" />)");
+    GP->sendCmd(R"(<SET ID="ENABLE_SEND_PUPIL_RIGHT" STATE="1" />)");
 
     GP->sendCmd(R"(<SET ID="ENABLE_SEND_DATA" STATE="1" />)");
     firstMsg = true;

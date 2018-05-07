@@ -63,6 +63,17 @@ GPDataParser::GPDataParser()
     keys.append("BPOGX");
     keys.append("BPOGY");
     keys.append("BPOGV");
+
+    keys.append("LPCX");
+    keys.append("LPCY");
+    keys.append("LPD");
+    keys.append("LPS");
+    keys.append("LPV");
+    keys.append("RPCX");
+    keys.append("RPCY");
+    keys.append("RPD");
+    keys.append("RPS");
+    keys.append("RPV");
 }
 
 QMap<QByteArray, double> GPDataParser::parseData(const QByteArray &data)
