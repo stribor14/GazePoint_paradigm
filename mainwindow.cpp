@@ -24,8 +24,9 @@ MainWindow::MainWindow(QWidget *parent) :
     });
 
     for (auto &&screen: QGuiApplication::screens()){
-        ui->i_screenBox->insertItem(0,screen->name().remove(0,4),screen->geometry());
+        ui->i_screenBox->insertItem(0, screen->name().remove(0,4), screen->geometry());
     }
+    ui->i_screenBox->setCurrentIndex(0);
 
     connect(ui->b_test, &QPushButton::clicked, this, [&](){
         params.GazePt->Start();
