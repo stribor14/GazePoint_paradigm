@@ -15,7 +15,7 @@ void GPLogger::startLog(const QString &folder, const QString &name)
     for(auto &&key: keys)
         logStream << key.data() << ";" ;
     logStream << "\n";
-    eventStream << "EVENT;EVENT_NUM;DATA_1;DATA_2;\n";
+    eventStream << "EVENT;EVENT_NUM;DATA_1;DATA_2;DATA_3;DATA_4;\n";
 
     isStarted = true;
 }
